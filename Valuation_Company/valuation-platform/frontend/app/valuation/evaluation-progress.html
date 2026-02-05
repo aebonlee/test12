@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>평가 진행 중 | ValueLink</title>
+    
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="../styles/mobile-optimize.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --deep-blue: #1D4ED8;
+            --deep-green: #166534;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --white: #FFFFFF;
+            --border: #E5E7EB;
+            --success: #10B981;
+            --warning: #F59E0B;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #F9FAFB;
+            color: var(--text-primary);
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+            gap: 40px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .page-description {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        /* Project Info Card */
+        .project-info-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .project-info-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .info-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .project-id {
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: var(--deep-blue);
+        }
+
+        /* Evaluation Progress Section */
+        .evaluation-section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .evaluation-section h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 32px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .progress-percentage {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--deep-green);
+        }
+
+        .progress-bar-wrapper {
+            height: 12px;
+            background: #E5E7EB;
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--deep-green), #10B981);
+            border-radius: 999px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Evaluation Steps */
+        .evaluation-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .evaluation-step {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: #F9FAFB;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .evaluation-step.waiting {
+            opacity: 0.5;
+        }
+
+        .evaluation-step.in-progress {
+            border-color: var(--warning);
+            background: #FFFBEB;
+        }
+
+        .evaluation-step.completed {
+            border-color: var(--success);
+            background: #ECFDF5;
+        }
+
+        .step-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .step-details {
+            flex: 1;
+        }
+
+        .step-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .step-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .step-status {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .step-status.waiting {
+            color: var(--text-secondary);
+        }
+
+        .step-status.in-progress {
+            color: var(--warning);
+        }
+
+        .step-status.completed {
+            color: var(--success);
+        }
+
+        /* Estimated Time */
+        .time-estimate {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px;
+            background: #DBEAFE;
+            border: 2px solid #93C5FD;
+            border-radius: 12px;
+        }
+
+        .time-icon {
+            font-size: 32px;
+        }
+
+        .time-info {
+            flex: 1;
+        }
+
+        .time-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1E40AF;
+            margin-bottom: 4px;
+        }
+
+        .time-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1E3A8A;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #E5E7EB;
+            border-top-color: var(--deep-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 접근 권한 확인 -->
+    <div id="access-denied" style="display:none;">
+        <div style="text-align:center; padding:80px 20px; max-width:500px; margin:0 auto;">
+            <div style="font-size:48px; margin-bottom:20px;">🔒</div>
+            <h2 style="color:#1F2937; margin-bottom:12px;">접근 권한이 없습니다</h2>
+            <p style="color:#6B7280; margin-bottom:24px;">이 페이지는 담당 회계사 및 관리자만 접근할 수 있습니다.<br>현재 진행 상태는 사이드바에서 확인하실 수 있습니다.</p>
+            <a href="../valuation.html" style="display:inline-block; padding:12px 24px; background:#166534; color:white; border-radius:8px; text-decoration:none; font-weight:600;">메인으로 돌아가기</a>
+        </div>
+    </div>
+
+    <script>
+        // Supabase 세션 기반 역할 체크
+        (function() {
+            var role = localStorage.getItem('userRole') || 'customer';
+            if (role === 'accountant' || role === 'admin') return;
+
+            document.getElementById('access-denied').style.display = 'block';
+            document.addEventListener('DOMContentLoaded', function() {
+                var header = document.getElementById('header-container');
+                if (header) header.style.display = 'none';
+                var container = document.querySelector('.container');
+                if (container) container.style.display = 'none';
+
+                var script = document.createElement('script');
+                script.type = 'module';
+                script.textContent = `
+                    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+                    try {
+                        const supabase = createClient(
+                            'https://arxrfetgaitkgiiqabap.supabase.co',
+                            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeHJmZXRnYWl0a2dpaXFhYmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3ODk1OTgsImV4cCI6MjA4NDM2NTU5OH0.BTnuv0sYr2MGe1c-gk8PWCviwkFyIiymfKp5Jhzwbo0'
+                        );
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (session && session.user) {
+                            const email = session.user.email.toLowerCase();
+                            const { data: userData } = await supabase
+                                .from('users').select('role').eq('user_id', session.user.id).single();
+                            const detectedRole = (userData && userData.role) ? userData.role
+                                : (['wksun999@gmail.com'].includes(email) ? 'admin' : 'customer');
+                            if (detectedRole === 'admin' || detectedRole === 'accountant') {
+                                localStorage.setItem('userRole', detectedRole);
+                                localStorage.setItem('userEmail', email);
+                                location.reload();
+                            }
+                        }
+                    } catch(e) { console.warn('Supabase 세션 확인 실패:', e); }
+                `;
+                document.body.appendChild(script);
+            });
+        })();
+    </script>
+
+    <!-- 헤더 -->
+    <div id="header-container"></div>
+
+    <div class="container">
+        <!-- 메인 컨텐츠 -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">평가 진행 중</h1>
+                <p class="page-description">평가 엔진이 기업가치를 계산하고 있습니다.</p>
+            </div>
+
+            <!-- 로딩 상태 -->
+            <div id="loadingState" class="loading">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">프로젝트 정보를 불러오는 중...</p>
+            </div>
+
+            <!-- 프로젝트 정보 -->
+            <div id="projectInfoCard" class="project-info-card" style="display: none;">
+                <h3>프로젝트 정보</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">프로젝트 번호</span>
+                        <span class="info-value project-id" id="projectIdDisplay">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">회사명</span>
+                        <span class="info-value" id="companyNameDisplay">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">평가법</span>
+                        <span class="info-value" id="methodDisplay">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">평가 기준일</span>
+                        <span class="info-value" id="valuationDateDisplay">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 평가 진행 상황 -->
+            <div id="evaluationSection" class="evaluation-section" style="display: none;">
+                <h3>평가 진행 상황</h3>
+
+                <!-- 진행률 바 -->
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">전체 진행률</span>
+                        <span class="progress-percentage" id="progressPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- 평가 단계 -->
+                <div class="evaluation-steps" id="evaluationSteps">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
+
+                <!-- 예상 소요 시간 -->
+                <div class="time-estimate" id="timeEstimate">
+                    <span class="time-icon">⏱️</span>
+                    <div class="time-info">
+                        <div class="time-label">예상 남은 시간</div>
+                        <div class="time-value" id="timeRemaining">계산 중...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 빈 상태 -->
+            <div id="emptyState" style="display: none; text-align: center; padding: 60px 20px;">
+                <div style="font-size: 64px; margin-bottom: 16px;">📊</div>
+                <p style="font-size: 16px; color: #6B7280; margin-bottom: 12px;">현재 진행 중인 평가가 없습니다.</p>
+                <p style="color: #9CA3AF; font-size: 14px;">프로젝트가 이 단계에 도달하면 자동으로 평가가 시작됩니다.</p>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- 헤더 로드 -->
+    <script>
+        fetch('../../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+                const scripts = document.getElementById('header-container').querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+    </script>
+
+    <!-- 페이지 스크립트 -->
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        import { checkMethodStatus, METHOD_NAMES, STATUS } from '../../components/project-status-checker.js';
+
+        // Supabase 클라이언트
+        const SUPABASE_URL = 'https://arxrfetgaitkgiiqabap.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeHJmZXRnYWl0a2dpaXFhYmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3ODk1OTgsImV4cCI6MjA4NDM2NTU5OH0.BTnuv0sYr2MGe1c-gk8PWCviwkFyIiymfKp5Jhzwbo0';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 평가 단계 정의 (평가법별로 다를 수 있음)
+        const EVALUATION_STEPS = {
+            dcf: [
+                { id: 1, name: '재무제표 분석', description: '과거 재무 데이터를 분석하고 있습니다' },
+                { id: 2, name: '현금흐름 추정', description: '미래 현금흐름을 예측하고 있습니다' },
+                { id: 3, name: '할인율 계산', description: 'WACC(가중평균자본비용)를 계산하고 있습니다' },
+                { id: 4, name: '터미널 밸류 계산', description: '영구성장가치를 산출하고 있습니다' },
+                { id: 5, name: '기업가치 산출', description: '현재가치로 할인하여 기업가치를 계산하고 있습니다' }
+            ],
+            relative: [
+                { id: 1, name: '비교기업 선정', description: '유사 상장기업을 선정하고 있습니다' },
+                { id: 2, name: '재무지표 수집', description: '비교기업의 재무 데이터를 수집하고 있습니다' },
+                { id: 3, name: '배수 계산', description: 'PER, PBR, EV/EBITDA 등을 계산하고 있습니다' },
+                { id: 4, name: '조정 및 보정', description: '차이점을 반영하여 배수를 조정하고 있습니다' },
+                { id: 5, name: '기업가치 산출', description: '조정된 배수로 기업가치를 계산하고 있습니다' }
+            ],
+            intrinsic: [
+                { id: 1, name: '수익력 분석', description: '과거 수익성을 분석하고 있습니다' },
+                { id: 2, name: '정상수익 추정', description: '지속가능한 정상수익을 추정하고 있습니다' },
+                { id: 3, name: '자본환원율 결정', description: '적정 자본환원율을 산정하고 있습니다' },
+                { id: 4, name: '영업권 가치 계산', description: '초과수익력을 평가하고 있습니다' },
+                { id: 5, name: '기업가치 산출', description: '순자산가치에 영업권을 더하고 있습니다' }
+            ],
+            asset: [
+                { id: 1, name: '자산 목록 작성', description: '모든 자산을 식별하고 있습니다' },
+                { id: 2, name: '시가 평가', description: '각 자산의 공정가치를 평가하고 있습니다' },
+                { id: 3, name: '부채 평가', description: '부채의 시가를 평가하고 있습니다' },
+                { id: 4, name: '순자산 계산', description: '자산에서 부채를 차감하고 있습니다' },
+                { id: 5, name: '기업가치 산출', description: '최종 순자산가치를 계산하고 있습니다' }
+            ],
+            inheritance_tax: [
+                { id: 1, name: '순자산가액 계산', description: '자산과 부채를 평가하고 있습니다' },
+                { id: 2, name: '수익가액 계산', description: '최근 3년 평균이익을 산정하고 있습니다' },
+                { id: 3, name: '가중평균 계산', description: '순자산가액과 수익가액을 가중평균하고 있습니다' },
+                { id: 4, name: '할증/할인 적용', description: '지배주주 할증 등을 반영하고 있습니다' },
+                { id: 5, name: '기업가치 산출', description: '최종 평가액을 계산하고 있습니다' }
+            ]
+        };
+
+        let progressInterval = null;
+        let currentProgress = 0;
+
+        async function loadProject() {
+            try {
+                // URL에서 projectId와 method 가져오기
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('projectId');
+                const method = urlParams.get('method');
+
+                if (!projectId || !method) {
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('emptyState').style.display = 'block';
+                    return;
+                }
+
+                // 프로젝트 정보 조회
+                const { data: project, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .eq('project_id', projectId)
+                    .single();
+
+                if (error || !project) {
+                    console.error('프로젝트 조회 실패:', error);
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('emptyState').style.display = 'block';
+                    return;
+                }
+
+                // 평가법 상태 확인
+                const methodStatus = await checkMethodStatus(projectId, method);
+
+                // 프로젝트 정보 표시
+                displayProjectInfo(project, method);
+
+                // 평가 진행 상황 표시
+                displayEvaluationProgress(method);
+
+                // 진행률 시뮬레이션 시작
+                startProgressSimulation();
+
+                // 로딩 숨김
+                document.getElementById('loadingState').style.display = 'none';
+
+            } catch (error) {
+                console.error('오류 발생:', error);
+                alert('오류가 발생했습니다.');
+            }
+        }
+
+        function displayProjectInfo(project, method) {
+            const methodName = METHOD_NAMES[method] || method;
+
+            document.getElementById('projectIdDisplay').textContent = project.project_id;
+            document.getElementById('companyNameDisplay').textContent =
+                project.company_name || '-';
+            document.getElementById('methodDisplay').textContent = methodName;
+            document.getElementById('valuationDateDisplay').textContent =
+                project.valuation_date || '-';
+
+            document.getElementById('projectInfoCard').style.display = 'block';
+        }
+
+        function displayEvaluationProgress(method) {
+            const steps = EVALUATION_STEPS[method] || EVALUATION_STEPS.dcf;
+            const stepsContainer = document.getElementById('evaluationSteps');
+            stepsContainer.innerHTML = '';
+
+            steps.forEach((step, index) => {
+                const stepElement = document.createElement('div');
+                stepElement.className = 'evaluation-step waiting';
+                stepElement.id = `step-${step.id}`;
+
+                stepElement.innerHTML = `
+                    <span class="step-icon">⏳</span>
+                    <div class="step-details">
+                        <div class="step-name">${step.name}</div>
+                        <div class="step-description">${step.description}</div>
+                    </div>
+                    <div class="step-status waiting">
+                        대기 중
+                    </div>
+                `;
+
+                stepsContainer.appendChild(stepElement);
+            });
+
+            document.getElementById('evaluationSection').style.display = 'block';
+        }
+
+        async function pollEvaluationProgress() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('projectId');
+                const method = urlParams.get('method');
+
+                // Backend API 호출
+                const response = await fetch(
+                    `http://localhost:8000/api/v1/valuation/progress?project_id=${projectId}&method=${method}`
+                );
+
+                if (!response.ok) {
+                    console.error('Progress API error:', response.status);
+                    return;
+                }
+
+                const data = await response.json();
+
+                // 진행률 업데이트
+                const progressPercent = data.progress || 0;
+                updateProgressBar(progressPercent);
+
+                // 평가 단계 업데이트 (progress 10-30%를 5개 단계에 매핑)
+                // Step 0-4: 진행률 10-30% 구간
+                const stepIndex = Math.max(0, Math.min(4, Math.floor((progressPercent - 10) / 4)));
+                updateEvaluationSteps(stepIndex, method);
+
+                // 예상 남은 시간 계산
+                const remainingPercent = 100 - progressPercent;
+                const estimatedMinutes = Math.ceil(remainingPercent / 5); // ~5% per minute
+                updateRemainingTime(estimatedMinutes);
+
+                // Step 12 완료 시 잔금 입금 페이지로 이동
+                if (data.current_step === 12) {
+                    clearInterval(progressInterval);
+
+                    // 모든 단계 완료 표시
+                    const steps = EVALUATION_STEPS[method] || EVALUATION_STEPS.dcf;
+                    steps.forEach((step) => {
+                        const stepElement = document.getElementById(`step-${step.id}`);
+                        if (stepElement) {
+                            stepElement.className = 'evaluation-step completed';
+                            stepElement.querySelector('.step-icon').textContent = '✅';
+                            stepElement.querySelector('.step-status').className = 'step-status completed';
+                            stepElement.querySelector('.step-status').textContent = '완료';
+                        }
+                    });
+
+                    updateProgressBar(100);
+                    document.getElementById('timeRemaining').textContent = '완료';
+
+                    // 3초 후 잔금 입금 페이지로 이동 (Step 13)
+                    setTimeout(() => {
+                        window.location.href = `./balance-payment.html?projectId=${projectId}&method=${method}`;
+                    }, 3000);
+                }
+                // Step 7-11: 회계사 검토 및 보고서 작성 진행 중
+                else if (data.current_step >= 7 && data.current_step < 12) {
+                    // 회계사 검토 단계 표시 (UI 업데이트만)
+                    const currentStepInfo = EVALUATION_STEPS[method] || EVALUATION_STEPS.dcf;
+                    console.log(`Step ${data.current_step}: 회계사 검토 진행 중...`);
+                }
+            } catch (error) {
+                console.error('Evaluation progress polling error:', error);
+            }
+        }
+
+        function updateEvaluationSteps(currentStepIndex, method) {
+            const steps = EVALUATION_STEPS[method] || EVALUATION_STEPS.dcf;
+
+            steps.forEach((step, index) => {
+                const stepElement = document.getElementById(`step-${step.id}`);
+                if (!stepElement) return;
+
+                if (index < currentStepIndex) {
+                    // 완료된 단계
+                    stepElement.className = 'evaluation-step completed';
+                    stepElement.querySelector('.step-icon').textContent = '✅';
+                    stepElement.querySelector('.step-status').className = 'step-status completed';
+                    stepElement.querySelector('.step-status').textContent = '완료';
+                } else if (index === currentStepIndex) {
+                    // 진행 중인 단계
+                    stepElement.className = 'evaluation-step in-progress';
+                    stepElement.querySelector('.step-icon').textContent = '⚙️';
+                    stepElement.querySelector('.step-status').className = 'step-status in-progress';
+                    stepElement.querySelector('.step-status').textContent = '진행 중...';
+                } else {
+                    // 대기 중인 단계
+                    stepElement.className = 'evaluation-step waiting';
+                    stepElement.querySelector('.step-icon').textContent = '⏳';
+                    stepElement.querySelector('.step-status').className = 'step-status waiting';
+                    stepElement.querySelector('.step-status').textContent = '대기 중';
+                }
+            });
+        }
+
+        function updateRemainingTime(minutes) {
+            const timeElement = document.getElementById('timeRemaining');
+            if (minutes <= 0) {
+                timeElement.textContent = '곧 완료됩니다';
+            } else if (minutes === 1) {
+                timeElement.textContent = '약 1분';
+            } else {
+                timeElement.textContent = `약 ${minutes}분`;
+            }
+        }
+
+        function startProgressSimulation() {
+            // 페이지 로드 시 1번만 호출 (Polling 제거)
+            // 24-48시간 소요 작업이므로 실시간 polling 불필요
+            // 이메일 알림으로 단계 완료 통지
+            pollEvaluationProgress();
+
+            // ❌ 3초 polling 제거 (24시간 작업에 28,800번 요청은 과도함)
+            // progressInterval = setInterval(pollEvaluationProgress, 3000);
+        }
+
+        function updateProgressBar(percentage) {
+            document.getElementById('progressBar').style.width = `${percentage}%`;
+            document.getElementById('progressPercentage').textContent = `${percentage}%`;
+        }
+
+        // 페이지 언로드 시 인터벌 정리
+        window.addEventListener('beforeunload', () => {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+        });
+
+        // 페이지 로드 시 실행
+        loadProject();
+    </script>
+</body>
+</html>

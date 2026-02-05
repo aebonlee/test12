@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link - 투자·제휴·서포터 연결 | ValueLink</title>
+    
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="styles/mobile-optimize.css">
+    <style>
+        :root {
+            --deep-blue: #1D4ED8;
+            --deep-green: #166534;
+            --amber: #F59E0B;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --white: #FFFFFF;
+            --border: #E5E7EB;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #F9FAFB;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero {
+            flex-shrink: 0;
+        }
+
+        /* Header placeholder */
+        #header-container {
+            min-height: 90px;
+        }
+
+        /* Hero Section - 초록색 (기업을 위한 연결) 👑 */
+        .hero {
+            background: linear-gradient(135deg, var(--deep-green) 0%, #15803D 100%);
+            padding: 40px 40px 50px 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .hero-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .hero-description {
+            font-size: 19px;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+            gap: 40px;
+        }
+
+        /* 메인 영역 */
+        .main-area {
+            flex: 1;
+            min-width: 0;
+            padding: 40px 0;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--text-primary);
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        /* Company Table */
+        .company-table {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: visible;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            table-layout: fixed;
+        }
+
+        .company-table th {
+            background: #F9FAFB;
+            padding: 16px 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .company-table th:nth-child(1) { width: 4%; text-align: center; } /* No. */
+        .company-table th:nth-child(2) { width: 13%; } /* 기업명 */
+        .company-table th:nth-child(3) { width: 7%; } /* 대표자 */
+        .company-table th:nth-child(4) { width: 10%; } /* 업종 */
+        .company-table th:nth-child(5) { width: 7%; } /* 설립일 */
+        .company-table th:nth-child(6) { width: 5%; } /* 지역 */
+        .company-table th:nth-child(7) { width: 10%; } /* 기업가치 */
+        .company-table th:nth-child(8) { width: 11%; } /* 평가방법 */
+        .company-table th:nth-child(9) { width: 9%; } /* 평가기준일 */
+        .company-table th:nth-child(10) { width: 24%; } /* 연결 문의 */
+
+        .company-table td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #F3F4F6;
+            color: var(--text-primary);
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .company-table td:nth-child(1) { text-align: center; font-weight: 500; color: var(--text-secondary); } /* No. */
+        .company-table td:nth-child(10) { white-space: normal; } /* 연결 문의 - 버튼 줄바꿈 허용 */
+
+        .company-table tr:hover {
+            background: #F9FAFB;
+        }
+
+        .company-link {
+            color: var(--deep-green);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .company-link:hover {
+            color: #15803D;
+            text-decoration: underline;
+        }
+
+        .need-tag {
+            display: inline-block;
+            padding: 5px 8px;
+            margin: 1px;
+            background: #F3F4F6;
+            border-radius: 6px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .need-tag:hover {
+            background: var(--deep-green);
+            color: white;
+        }
+
+        /* Connection Cards */
+        .connection-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            margin-bottom: 80px;
+        }
+
+        .connection-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 32px;
+            text-align: center;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .connection-card:hover {
+            border-color: var(--amber);
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .connection-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+        }
+
+        .connection-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .connection-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .connection-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: var(--amber);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: #D97706;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Company Grid */
+        .company-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .company-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .company-card:hover {
+            border-color: var(--deep-green);
+            box-shadow: 0 4px 16px rgba(22, 101, 52, 0.15);
+        }
+
+        .company-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .company-logo {
+            width: 60px;
+            height: 60px;
+            background: var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .company-info h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .company-info p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .company-valuation {
+            background: #DCFCE7;
+            color: var(--deep-green);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .company-summary {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .company-needs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .need-tag {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            background: #FEF3C7;
+            color: #D97706;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1px solid #FDE68A;
+        }
+
+        .need-tag:hover {
+            background: #FDE68A;
+            transform: translateY(-1px);
+            border-color: #D97706;
+        }
+
+        .company-footer {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+
+        .btn-contact {
+            flex: 1;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--amber);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-contact:hover {
+            background: #D97706;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .connection-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .company-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Hero Section */
+            .hero {
+                padding: 24px 20px 32px 20px;
+            }
+
+            .hero-title {
+                font-size: 28px;
+                margin-bottom: 8px;
+            }
+
+            .hero-description {
+                font-size: 14px;
+            }
+
+            /* Container */
+            .container {
+                padding: 32px 20px;
+            }
+
+            /* Section Title */
+            .section-title {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+
+            /* Company Table */
+            .company-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .company-table th,
+            .company-table td {
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .company-table th {
+                font-size: 12px;
+            }
+
+            /* Connection Grid */
+            .connection-grid {
+                gap: 20px;
+                margin-bottom: 40px;
+            }
+
+            .connection-card {
+                padding: 32px 24px;
+            }
+
+            .connection-icon {
+                font-size: 48px;
+                margin-bottom: 20px;
+            }
+
+            .connection-title {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+
+            .connection-subtitle {
+                font-size: 14px;
+                margin-bottom: 20px;
+            }
+
+            .connection-description {
+                font-size: 13px;
+                margin-bottom: 20px;
+            }
+
+            .btn-primary {
+                width: 100%;
+                padding: 10px 24px;
+                font-size: 15px;
+            }
+
+            /* Company Cards */
+            .company-card {
+                padding: 24px 20px;
+            }
+
+            .company-header {
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+
+            .company-logo {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .company-info h3 {
+                font-size: 18px;
+            }
+
+            .company-info p {
+                font-size: 13px;
+            }
+
+            .company-valuation {
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+
+            .company-summary {
+                font-size: 13px;
+                margin-bottom: 16px;
+            }
+
+            .company-needs {
+                gap: 6px;
+                margin-bottom: 16px;
+            }
+
+            .need-tag {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .company-footer {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .btn-secondary,
+            .btn-contact {
+                width: 100%;
+                padding: 12px 20px;
+            }
+
+            /* Footer */
+            footer {
+                padding: 24px 20px;
+                margin-top: 40px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .footer-logo {
+                font-size: 16px;
+            }
+
+            .footer-text {
+                font-size: 12px;
+            }
+        }
+
+        /* 우측 사이드바 */
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+            position: sticky;
+            top: 110px;
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #D97706;
+            background: #FEF3C7;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-title-icon {
+            font-size: 18px;
+        }
+
+        .org-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .org-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .org-item:hover {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .org-icon {
+            display: none;
+        }
+
+        .org-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .org-type {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #F3F4F6;
+            color: var(--text-secondary);
+        }
+
+        .org-item.hidden {
+            display: none;
+        }
+
+        .btn-more {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #D97706;
+            background: #FEF3C7;
+            border: 1px solid #FDE68A;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-more:hover {
+            background: #FDE68A;
+            border-color: #D97706;
+        }
+
+        .btn-more .arrow {
+            transition: transform 0.2s ease;
+        }
+
+        .btn-more.expanded .arrow {
+            transform: rotate(180deg);
+        }
+
+        /* 반응형 - 사이드바 */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                order: -1;
+            }
+
+            .sidebar-card {
+                position: static;
+            }
+
+            .org-list {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .org-item.hidden {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .org-list {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar-card {
+                padding: 20px;
+            }
+
+            .sidebar-title {
+                font-size: 15px;
+                padding: 10px 14px;
+            }
+        }
+
+        /* FOOTER */
+        footer {
+            background: #1E3A5F;
+            color: var(--white);
+            padding: 32px 40px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo { font-size: 18px; font-weight: 700; }
+        .footer-text { font-size: 13px; opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div id="header-container"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1 class="hero-title">Link</h1>
+        <p class="hero-description">
+            기업가치 평가를 받은 기업에게 투자자, 비즈니스 파트너, 서포터를 발굴하여 연결시킵니다
+        </p>
+    </section>
+
+    <!-- Container -->
+    <div class="container">
+        <!-- 메인 영역 -->
+        <div class="main-area">
+            <!-- Company List -->
+            <h2 class="section-title" id="companies">평가받은 기업 목록</h2>
+
+            <table class="company-table">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>기업명</th>
+                    <th>대표자</th>
+                    <th>업종</th>
+                    <th>설립일</th>
+                    <th>지역</th>
+                    <th>기업가치</th>
+                    <th>평가방법</th>
+                    <th>평가기준일</th>
+                    <th>연결 문의</th>
+                </tr>
+            </thead>
+            <tbody id="company-tbody">
+                <!-- Supabase에서 동적으로 로드 -->
+                <tr>
+                    <td colspan="10" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        데이터를 불러오는 중...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <!-- 우측 사이드바 -->
+        <aside class="sidebar">
+            <div class="sidebar-card">
+                <div class="sidebar-title">
+                    <span class="sidebar-title-icon">🔗</span>
+                    지원기관 바로가기
+                </div>
+                <div class="org-list">
+                    <!-- 1-10: 기본 표시 -->
+                    <a href="https://kesia.or.kr" target="_blank" class="org-item">
+                        <span class="org-name">한국초기투자기관협회</span>
+                        <span class="org-type">초기</span>
+                    </a>
+                    <a href="https://www.kvca.or.kr" target="_blank" class="org-item">
+                        <span class="org-name">한국벤처캐피탈협회</span>
+                        <span class="org-type">VC</span>
+                    </a>
+                    <a href="https://kban.or.kr" target="_blank" class="org-item">
+                        <span class="org-name">한국엔젤투자협회</span>
+                        <span class="org-type">엔젤</span>
+                    </a>
+                    <a href="https://www.k-vic.co.kr" target="_blank" class="org-item">
+                        <span class="org-name">한국벤처투자</span>
+                        <span class="org-type">모펀드</span>
+                    </a>
+                    <a href="https://www.k-startup.go.kr" target="_blank" class="org-item">
+                        <span class="org-name">K-Startup</span>
+                        <span class="org-type">창업</span>
+                    </a>
+                    <a href="https://www.jointips.or.kr" target="_blank" class="org-item">
+                        <span class="org-name">TIPS 프로그램</span>
+                        <span class="org-type">투자</span>
+                    </a>
+                    <a href="https://www.semas.or.kr" target="_blank" class="org-item">
+                        <span class="org-name">소상공인시장진흥공단</span>
+                        <span class="org-type">지원</span>
+                    </a>
+                    <a href="https://www.kosmes.or.kr" target="_blank" class="org-item">
+                        <span class="org-name">중소벤처기업진흥공단</span>
+                        <span class="org-type">지원</span>
+                    </a>
+                    <a href="https://www.kised.or.kr" target="_blank" class="org-item">
+                        <span class="org-name">창업진흥원</span>
+                        <span class="org-type">창업</span>
+                    </a>
+                    <a href="https://www.nipa.kr" target="_blank" class="org-item">
+                        <span class="org-name">정보통신산업진흥원</span>
+                        <span class="org-type">IT</span>
+                    </a>
+                    <!-- 11-13: 더보기 시 표시 -->
+                    <a href="https://www.kibo.or.kr" target="_blank" class="org-item hidden">
+                        <span class="org-name">기술보증기금</span>
+                        <span class="org-type">보증</span>
+                    </a>
+                    <a href="https://www.kodit.co.kr" target="_blank" class="org-item hidden">
+                        <span class="org-name">신용보증기금</span>
+                        <span class="org-type">보증</span>
+                    </a>
+                    <a href="https://www.kita.net" target="_blank" class="org-item hidden">
+                        <span class="org-name">한국무역협회</span>
+                        <span class="org-type">무역</span>
+                    </a>
+                </div>
+                <button class="btn-more" id="btnMoreOrg">
+                    더보기 <span class="arrow">▼</span>
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">ValueLink</div>
+            <div class="footer-text">© 2026 ValueLink. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // Supabase 설정
+        const SUPABASE_URL = 'https://arxrfetgaitkgiiqabap.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeHJmZXRnYWl0a2dpaXFhYmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3ODk1OTgsImV4cCI6MjA4NDM2NTU5OH0.BTnuv0sYr2MGe1c-gk8PWCviwkFyIiymfKp5Jhzwbo0';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 평가방법 코드 → 한글 매핑
+        const methodNames = {
+            'dcf': 'DCF평가법',
+            'relative': '상대가치평가법',
+            'intrinsic': '본질가치평가법',
+            'asset': '자산가치평가법',
+            'inheritance_tax': '상증세법평가법'
+        };
+
+        // 날짜 포맷 (YYYY-MM-DD → YYYY.MM.DD)
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        // 기업 목록 로드
+        async function loadCompanies() {
+            const tbody = document.getElementById('company-tbody');
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('valuation_reports')
+                    .select('*')
+                    .order('id', { ascending: true });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="10" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                등록된 기업이 없습니다.
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = data.map((company, index) => {
+                    const methodName = methodNames[company.valuation_method] || company.valuation_method;
+                    const value = company.valuation_amount_display || '-';
+                    const encodedName = encodeURIComponent(company.company_name);
+                    const encodedValue = encodeURIComponent(value);
+                    const encodedMethod = encodeURIComponent(methodName);
+
+                    return `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><a href="report-summary.html?company=${encodedName}" class="company-link">${company.company_name}</a></td>
+                            <td>${company.ceo_name || '-'}</td>
+                            <td>${company.industry || '-'}</td>
+                            <td>${company.founded_year || '-'}</td>
+                            <td>${company.location || '-'}</td>
+                            <td>${value}</td>
+                            <td>${methodName}</td>
+                            <td>${formatDate(company.valuation_date)}</td>
+                            <td>
+                                <a href="inquiry-invest.html?name=${encodedName}&value=${encodedValue}&method=${encodedMethod}" class="need-tag invest">투자</a>
+                                <a href="inquiry-partner.html?name=${encodedName}&value=${encodedValue}&method=${encodedMethod}" class="need-tag partner">제휴</a>
+                                <a href="inquiry-support.html?name=${encodedName}&value=${encodedValue}&method=${encodedMethod}" class="need-tag support">서포팅</a>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error('기업 목록 로드 실패:', err);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" style="text-align: center; padding: 40px; color: #EF4444;">
+                            데이터 로드 실패: ${err.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // 헤더 로드
+        fetch('../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                const container = document.getElementById('header-container');
+                container.innerHTML = data;
+
+                // 삽입된 script 태그를 수동으로 실행
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+
+        // 더보기 버튼 토글
+        const btnMore = document.getElementById('btnMoreOrg');
+        const hiddenItems = document.querySelectorAll('.org-item.hidden');
+        let isExpanded = false;
+
+        btnMore.addEventListener('click', function() {
+            isExpanded = !isExpanded;
+
+            hiddenItems.forEach(item => {
+                if (isExpanded) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+
+            btnMore.classList.toggle('expanded', isExpanded);
+            btnMore.innerHTML = isExpanded
+                ? '접기 <span class="arrow">▼</span>'
+                : '더보기 <span class="arrow">▼</span>';
+        });
+
+        // 페이지 로드 시 기업 목록 로드
+        document.addEventListener('DOMContentLoaded', loadCompanies);
+    </script>
+</body>
+</html>

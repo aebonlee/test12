@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValueLink - 기업가치평가 플랫폼</title>
+    
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="styles/mobile-optimize.css">
+    <style>
+        /* Header Styles */
+        :root {
+            --deep-blue: #1D4ED8;
+            --deep-green: #166534;
+            --amber: #F59E0B;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --white: #FFFFFF;
+            --border: #E5E7EB;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #FFFFFF;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            flex: 1;
+        }
+
+        .main-header {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 0;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-container {
+            text-decoration: none;
+            display: block;
+        }
+
+        .logo-svg {
+            height: 75px;
+            width: auto;
+        }
+
+        .main-menu {
+            display: flex;
+            gap: 8px;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .menu-item:hover {
+            background: #F3F4F6;
+            color: var(--text-primary);
+        }
+
+        .menu-item.active {
+            color: var(--deep-blue);
+            background: #DBEAFE;
+        }
+
+        .notification-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .notification-btn:hover {
+            background: #F3F4F6;
+        }
+
+        .notification-icon {
+            font-size: 24px;
+            color: var(--text-secondary);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 18px;
+            height: 18px;
+            background: #EF4444;
+            border-radius: 50%;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-login {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-login:hover {
+            border-color: var(--deep-blue);
+            color: var(--deep-blue);
+            background: #F0F9FF;
+        }
+
+        .btn-signup {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            background: var(--deep-blue);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-signup:hover {
+            background: #1E40AF;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+        }
+
+        /* Body Styles */
+
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+            gap: 40px;
+        }
+
+        /* 메인 영역 */
+        .main-area {
+            flex: 1;
+            padding: 60px 0;
+        }
+
+        /* Hero Section - 파란색 (평가 시스템) */
+        .hero {
+            background: linear-gradient(135deg, var(--deep-blue) 0%, #1E40AF 100%);
+            padding: 60px 0 80px 0;
+            text-align: center;
+            color: white;
+        }
+
+        .hero-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .hero-description {
+            font-size: 16px;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto 24px auto;
+        }
+
+        .hero-cta {
+            display: inline-block;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--deep-blue);
+            background: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 18px;
+            color: #6B7280;
+            font-weight: 500;
+        }
+
+        /* 평가법 목록 */
+        .valuation-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+        }
+
+        .method-card {
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 16px;
+            padding: 32px;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            transition: all 0.2s ease;
+        }
+
+        .method-card:hover {
+            border-color: #1D4ED8;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.15);
+        }
+
+        .method-icon {
+            font-size: 48px;
+            flex-shrink: 0;
+        }
+
+        .method-info {
+            flex: 1;
+        }
+
+        .method-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 12px;
+        }
+
+        .method-summary {
+            font-size: 15px;
+            color: #6B7280;
+            line-height: 1.6;
+        }
+
+        .btn-detail {
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            background: #1D4ED8;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-detail:hover {
+            background: #1E40AF;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+        }
+
+        /* 우측 사이드바 래퍼 */
+        .sidebar-wrapper {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+        /* 반응형 */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar-wrapper {
+                width: 100%;
+            }
+
+            .method-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-header {
+                padding: 0 20px;
+                height: 70px;
+            }
+
+            .logo-svg {
+                height: 45px;
+            }
+
+            .menu-item {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+            .btn-login, .btn-signup {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            /* Hero Section */
+            .hero {
+                padding: 24px 20px 32px 20px;
+            }
+
+            .hero-title {
+                font-size: 28px;
+                margin-bottom: 8px;
+            }
+
+            .hero-description {
+                font-size: 14px;
+            }
+
+            /* Container */
+            .container {
+                padding: 24px 20px;
+                gap: 24px;
+            }
+
+            /* Method Cards */
+            .valuation-methods {
+                gap: 16px;
+            }
+
+            .method-card {
+                padding: 24px 20px;
+                gap: 20px;
+            }
+
+            .method-icon {
+                font-size: 40px;
+            }
+
+            .method-name {
+                font-size: 18px;
+                margin-bottom: 8px;
+            }
+
+            .method-summary {
+                font-size: 14px;
+            }
+
+            .btn-detail {
+                width: 100%;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            /* Sidebar */
+            .sidebar-wrapper {
+                width: 100%;
+            }
+
+            /* Footer */
+            footer {
+                padding: 24px 20px;
+                margin-top: 40px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .footer-logo {
+                font-size: 16px;
+            }
+
+            .footer-text {
+                font-size: 12px;
+            }
+        }
+
+        /* FOOTER */
+        footer {
+            background: #1E3A5F;
+            color: var(--white);
+            padding: 32px 40px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo { font-size: 18px; font-weight: 700; }
+        .footer-text { font-size: 13px; opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div id="header-container"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1 class="hero-title">Valuation</h1>
+        <p class="hero-description">
+            DCF 등 5가지 평가방법을 적용해서 AI를 활용하여 빠르고 낮은 비용으로 기업의 가치를 평가합니다
+        </p>
+    </section>
+
+    <div class="container">
+        <!-- 메인 영역 -->
+        <div class="main-area">
+
+            <div class="valuation-methods">
+                <!-- DCF평가법 -->
+                <div class="method-card">
+                    <div class="method-icon">📈</div>
+                    <div class="method-info">
+                        <div class="method-name">DCF평가법</div>
+                        <div class="method-summary">
+                            기업이 미래에 창출할 현금흐름을 현재 가치로 환산하여 기업 가치를 산정하는 방법입니다. 성장 가능성이 있는 기업, M&A 및 투자 의사결정에 주로 사용됩니다.
+                        </div>
+                    </div>
+                    <a href="./valuation/guides/guide-dcf.html" class="btn-detail">상세보기</a>
+                </div>
+
+                <!-- 본질가치평가법 -->
+                <div class="method-card">
+                    <div class="method-icon">💎</div>
+                    <div class="method-info">
+                        <div class="method-name">본질가치평가법</div>
+                        <div class="method-summary">
+                            기업의 자산가치와 수익가치를 40:60의 비율로 가중평균하여 산정하는 자본시장법에 따른 평가 방법입니다. IPO 공모가 산정에서 중요한 기준으로 활용됩니다.
+                        </div>
+                    </div>
+                    <a href="./valuation/guides/guide-intrinsic.html" class="btn-detail">상세보기</a>
+                </div>
+
+                <!-- 자산가치평가법 -->
+                <div class="method-card">
+                    <div class="method-icon">🏦</div>
+                    <div class="method-info">
+                        <div class="method-name">자산가치평가법</div>
+                        <div class="method-summary">
+                            기업이 보유한 자산의 시장 가치를 합산하여 기업 가치를 산정하는 방법입니다. 부동산, 유형자산이 많은 기업이나 M&A 시 최소 가치 산정에 적합합니다.
+                        </div>
+                    </div>
+                    <a href="./valuation/guides/guide-asset.html" class="btn-detail">상세보기</a>
+                </div>
+
+                <!-- 상대가치평가법 -->
+                <div class="method-card">
+                    <div class="method-icon">⚖️</div>
+                    <div class="method-info">
+                        <div class="method-name">상대가치평가법</div>
+                        <div class="method-summary">
+                            유사한 기업들의 시장 가치를 비교하여 평가 대상 기업의 가치를 산정하는 방법입니다. PER, PBR, EV/EBITDA 등의 배수를 활용하여 빠르고 직관적인 평가가 가능합니다.
+                        </div>
+                    </div>
+                    <a href="./valuation/guides/guide-relative.html" class="btn-detail">상세보기</a>
+                </div>
+
+                <!-- 상증세법평가법 -->
+                <div class="method-card">
+                    <div class="method-icon">📜</div>
+                    <div class="method-info">
+                        <div class="method-name">상증세법평가법</div>
+                        <div class="method-summary">
+                            상속세 및 증여세법에서 정한 방법으로 비상장주식의 가치를 산정하는 법정 평가 방법입니다. 비상장주식 증여, 상속, 임직원 스톡옵션 행사 시 사용됩니다.
+                        </div>
+                    </div>
+                    <a href="./valuation/guides/guide-tax.html" class="btn-detail">상세보기</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측 사이드바 (14단계 프로세스) -->
+        <aside id="sidebar-container" class="sidebar-wrapper">
+            <!-- 공통 사이드바 컴포넌트가 여기에 주입됨 -->
+        </aside>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">ValueLink</div>
+            <div class="footer-text">© 2026 ValueLink. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <script>
+        // 헤더 로드
+        fetch('../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                const container = document.getElementById('header-container');
+                container.innerHTML = data;
+
+                // 삽입된 script 태그를 수동으로 실행
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+    </script>
+
+    <!-- 사이드바 초기화 -->
+    <script type="module">
+        import { injectSidebar } from '../components/common-sidebar.js';
+
+        // 페이지 로드 시 사이드바 초기화 (로그인 체크 없이 바로 표시)
+        // TODO: 나중에 로그인 기능 구현 시 getCurrentProject() 연동
+        injectSidebar(
+            'sidebar-container',
+            1,        // 1단계 (서비스 안내)
+            'not_requested',  // 상태: 미선택
+            null,     // 평가법 없음
+            null,     // 프로젝트 없음
+            1,        // startStep: 1단계부터
+            4         // endStep: 4단계까지 (1-4번으로 표시)
+        );
+    </script>
+</body>
+</html>

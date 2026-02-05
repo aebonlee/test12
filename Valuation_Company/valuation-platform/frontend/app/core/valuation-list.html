@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>평가 프로젝트 목록 | ValueLink</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="../styles/mobile-optimize.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --deep-blue: #1D4ED8;
+            --deep-green: #166534;
+            --amber: #F59E0B;
+            --red: #DC2626;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6B7280;
+            --bg-light: #F9FAFB;
+            --white: #FFFFFF;
+            --border: #E5E7EB;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+        }
+
+        /* 컨테이너 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        /* 섹션 */
+        .section {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .section-count {
+            padding: 4px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 20px;
+            background: var(--bg-light);
+            color: var(--text-muted);
+        }
+
+        /* 진행 중 뱃지 색상 */
+        .section-count.in-progress {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        /* 완료 뱃지 색상 */
+        .section-count.completed {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        /* 테이블 */
+        .project-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .project-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .project-table td {
+            padding: 16px;
+            font-size: 14px;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .project-table tbody tr:hover {
+            background: #F3F4F6;
+        }
+
+        .project-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* No 컬럼 */
+        .col-no {
+            width: 60px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* 평가방법 뱃지 */
+        .method-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            background: #DBEAFE;
+            color: var(--deep-blue);
+        }
+
+        /* 현재 단계 */
+        .stage-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .stage-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+        }
+
+        .stage-badge.waiting {
+            background: #E0E7FF;
+            color: #3730A3;
+        }
+
+        .stage-badge.review {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .stage-badge.document-request {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .stage-badge.complete {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        /* 추가 자료 요청 알림 */
+        .request-alert {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #FEE2E2;
+            color: #991B1B;
+            border-radius: 4px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* 보고서 수령일 (완료) */
+        .report-date {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--deep-green);
+        }
+
+        /* 상세 버튼 */
+        .btn-detail {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--deep-blue);
+            background: transparent;
+            border: 1px solid var(--deep-blue);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-detail:hover {
+            background: var(--deep-blue);
+            color: var(--white);
+        }
+
+        /* 하단 새 신청 버튼 */
+        .bottom-action {
+            text-align: center;
+            padding: 32px 0;
+        }
+
+        .btn-new-request {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--white);
+            background: var(--deep-blue);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-new-request:hover {
+            background: #1E40AF;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(29, 78, 216, 0.3);
+        }
+
+        /* 빈 상태 */
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* 로딩 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 3px solid #E5E7EB;
+            border-top-color: var(--deep-blue);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 담당 회계사 정보 */
+        .accountant-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .btn-inquiry {
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--deep-blue);
+            background: #EFF6FF;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-inquiry:hover {
+            background: #DBEAFE;
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            .page-header h1 {
+                font-size: 24px;
+            }
+
+            .section {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .section-header {
+                flex-wrap: wrap;
+            }
+
+            .project-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .project-table th,
+            .project-table td {
+                padding: 12px;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+
+            .btn-new-request {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div id="header-container"></div>
+
+    <!-- 메인 -->
+    <div class="container">
+        <div class="page-header">
+            <h1>평가 프로젝트 목록</h1>
+            <p>신청한 평가 프로젝트 현황을 확인하세요</p>
+        </div>
+
+        <!-- 평가 중 섹션 -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">평가 중</h2>
+                <span class="section-count in-progress" id="in-progress-count">0건</span>
+            </div>
+            <div id="in-progress-content">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 평가 완료 섹션 -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">평가 완료</h2>
+                <span class="section-count completed" id="completed-count">0건</span>
+            </div>
+            <div id="completed-content">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 새로운 평가 신청 버튼 -->
+        <div class="bottom-action">
+            <a href="../projects/project-create.html" class="btn-new-request">
+                ➕ 새로운 평가 신청하기
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 헤더 로드
+        fetch('../../components/header.html')
+            .then(response => {
+                if (!response.ok) throw new Error('헤더 파일을 찾을 수 없습니다');
+                return response.text();
+            })
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+
+                // 현재 페이지 메뉴 활성화 (Valuation)
+                setTimeout(() => {
+                    const menuValuation = document.getElementById('menu-valuation');
+                    if (menuValuation) menuValuation.classList.add('active');
+                }, 100);
+            })
+            .catch(error => {
+                console.error('헤더 로드 실패:', error);
+                // 헤더 로드 실패해도 페이지는 정상 작동하도록 기본 헤더 표시
+                document.getElementById('header-container').innerHTML = `
+                    <header style="background: white; padding: 16px 40px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between;">
+                        <a href="../../index.html" style="font-size: 24px; font-weight: 700; color: #1E3A5F; text-decoration: none;">ValueLink</a>
+                        <nav style="display: flex; gap: 16px;">
+                            <a href="../valuation.html" style="color: #1D4ED8; font-weight: 600; text-decoration: none;">Valuation</a>
+                            <a href="mypage-company.html" style="color: #111827; text-decoration: none;">My Page</a>
+                        </nav>
+                    </header>
+                `;
+            });
+
+        // Supabase 설정 (옵션 - 테스트 모드에서는 사용하지 않음)
+        let supabase = null;
+        try {
+            if (window.supabase) {
+                const SUPABASE_URL = 'https://arxrfetgaitkgiiqabap.supabase.co';
+                const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeHJmZXRnYWl0a2dpaXFhYmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3ODk1OTgsImV4cCI6MjA4NDM2NTU5OH0.BTnuv0sYr2MGe1c-gk8PWCviwkFyIiymfKp5Jhzwbo0';
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        } catch (e) {
+            console.log('Supabase 초기화 스킵 (테스트 모드)');
+        }
+
+        // 평가방법 한글명
+        const methodNames = {
+            'dcf': 'DCF 할인법',
+            'relative': '상대가치평가법',
+            'capital_market_law': '본질가치평가법',
+            'asset': '자산가치평가법',
+            'inheritance_tax_law': '상증세법평가법'
+        };
+
+        // 단계 정보
+        const stageInfo = {
+            'requested': { label: '접수 대기', class: 'waiting' },
+            'reviewing': { label: '검토 중', class: 'review' },
+            'document_request': { label: '추가 자료 요청', class: 'document-request' },
+            'evaluating': { label: '평가 진행 중', class: 'review' },
+            'completed': { label: '평가 완료', class: 'complete' }
+        };
+
+        // 테스트 데이터 (DB 연동 전)
+        const testData = {
+            inProgress: [
+                {
+                    id: 1,
+                    method: 'dcf',
+                    request_date: '2026-01-20',
+                    stage: 'document_request',
+                    has_document_request: true,
+                    accountant: '김회계',
+                    company: '(주)파인드월드'
+                },
+                {
+                    id: 2,
+                    method: 'relative',
+                    request_date: '2026-01-25',
+                    stage: 'evaluating',
+                    has_document_request: false,
+                    accountant: '박평가',
+                    company: '(주)파인드월드'
+                }
+            ],
+            completed: [
+                {
+                    id: 3,
+                    method: 'asset',
+                    request_date: '2025-11-15',
+                    report_date: '2025-12-10',
+                    company: '(주)파인드월드'
+                }
+            ]
+        };
+
+        // 평가 중 테이블 렌더링
+        function renderInProgressTable(projects) {
+            const container = document.getElementById('in-progress-content');
+            document.getElementById('in-progress-count').textContent = projects.length + '건';
+
+            if (projects.length === 0) {
+                container.innerHTML = '<p class="empty-message">현재 진행 중인 평가가 없습니다.</p>';
+                return;
+            }
+
+            let html = `
+                <table class="project-table">
+                    <thead>
+                        <tr>
+                            <th class="col-no">No</th>
+                            <th>평가방법</th>
+                            <th>신청일</th>
+                            <th>현재 단계</th>
+                            <th>담당 회계사</th>
+                            <th>상세</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            projects.forEach((project, index) => {
+                const stage = stageInfo[project.stage] || stageInfo['requested'];
+
+                html += `
+                    <tr>
+                        <td class="col-no">${index + 1}</td>
+                        <td><span class="method-badge">${methodNames[project.method] || project.method}</span></td>
+                        <td>${project.request_date}</td>
+                        <td>
+                            <div class="stage-wrapper">
+                                <span class="stage-badge ${stage.class}">${stage.label}</span>
+                                ${project.has_document_request ? '<span class="request-alert">📋 추가 자료 제출 필요</span>' : ''}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="accountant-info">
+                                <span>${project.accountant || '-'}</span>
+                                ${project.accountant ? '<button class="btn-inquiry" onclick="openInquiry(' + project.id + ')">문의하기</button>' : ''}
+                            </div>
+                        </td>
+                        <td><a href="project-detail.html?id=${project.id}" class="btn-detail">상세 보기</a></td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // 평가 완료 테이블 렌더링
+        function renderCompletedTable(projects) {
+            const container = document.getElementById('completed-content');
+            document.getElementById('completed-count').textContent = projects.length + '건';
+
+            if (projects.length === 0) {
+                container.innerHTML = '<p class="empty-message">완료된 평가가 없습니다.</p>';
+                return;
+            }
+
+            let html = `
+                <table class="project-table">
+                    <thead>
+                        <tr>
+                            <th class="col-no">No</th>
+                            <th>평가방법</th>
+                            <th>신청일</th>
+                            <th>보고서 수령일</th>
+                            <th>상세</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            projects.forEach((project, index) => {
+                html += `
+                    <tr>
+                        <td class="col-no">${index + 1}</td>
+                        <td><span class="method-badge">${methodNames[project.method] || project.method}</span></td>
+                        <td>${project.request_date}</td>
+                        <td><span class="report-date">${project.report_date}</span></td>
+                        <td><a href="project-detail.html?id=${project.id}" class="btn-detail">보고서 보기</a></td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // 문의하기 열기
+        function openInquiry(projectId) {
+            alert('문의하기 기능은 추후 구현됩니다.\n\n프로젝트 ID: ' + projectId);
+        }
+
+        // 데이터 로드 (테스트 데이터 사용)
+        function loadProjects() {
+            // 테스트 데이터로 렌더링
+            setTimeout(() => {
+                renderInProgressTable(testData.inProgress);
+                renderCompletedTable(testData.completed);
+            }, 500);
+        }
+
+        // 페이지 로드
+        loadProjects();
+    </script>
+</body>
+</html>

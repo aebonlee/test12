@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCF 기업가치 평가 | ValueLink</title>
+    
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="../../styles/mobile-optimize.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --deep-blue: #1D4ED8;
+            --deep-blue-light: #3B82F6;
+            --deep-blue-pale: #DBEAFE;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6B7280;
+            --bg-light: #F3F4F6;
+            --white: #FFFFFF;
+            --border: #E5E7EB;
+            --success: #10B981;
+            --error: #EF4444;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+        }
+
+        /* Header styles moved to header.html component */
+
+        /* HERO SECTION */
+        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 40px; color: white; text-align: center; }
+        .hero-content { max-width: 1200px; margin: 0 auto; }
+        .hero-title { font-size: 36px; font-weight: 700; margin-bottom: 12px; }
+        .hero-subtitle { font-size: 18px; opacity: 0.9; margin-bottom: 20px; }
+        .hero-badge { display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 8px 16px; border-radius: 20px; font-size: 14px; }
+
+        /* MAIN */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .page-title {
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .page-title-content h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .page-title-content p {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        .btn-portal {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--white);
+            background: var(--success);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-portal:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        /* FORM LAYOUT */
+        .form-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .form-section {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 28px;
+        }
+
+        .form-section h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--deep-blue);
+            box-shadow: 0 0 0 3px var(--deep-blue-pale);
+        }
+
+        .form-group .unit {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* PROJECTION TABLE */
+        .projection-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        .projection-table th,
+        .projection-table td {
+            padding: 10px 8px;
+            text-align: right;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .projection-table th {
+            background: var(--bg-light);
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .projection-table td:first-child,
+        .projection-table th:first-child {
+            text-align: left;
+        }
+
+        .projection-table input {
+            width: 100%;
+            padding: 8px;
+            font-size: 13px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            text-align: right;
+        }
+
+        /* BUTTONS */
+        .btn-calculate {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--white);
+            background: var(--deep-blue);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 24px;
+        }
+
+        .btn-calculate:hover {
+            background: #1E40AF;
+        }
+
+        .btn-calculate:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        /* RESULT SECTION */
+        .result-section {
+            grid-column: 1 / -1;
+            background: var(--white);
+            border-radius: 16px;
+            padding: 28px;
+            display: none;
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .result-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .summary-card {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .summary-card.highlight {
+            background: var(--deep-blue);
+            color: var(--white);
+        }
+
+        .summary-card label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .summary-card.highlight label {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .summary-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .summary-card.highlight .value {
+            color: var(--white);
+        }
+
+        .summary-card .sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .summary-card.highlight .sub {
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* RESULT TABLES */
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .result-table-section h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .result-table th,
+        .result-table td {
+            padding: 10px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-table th {
+            text-align: left;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--bg-light);
+        }
+
+        .result-table td {
+            text-align: right;
+        }
+
+        .result-table td:first-child {
+            text-align: left;
+            color: var(--text-secondary);
+        }
+
+        .result-table tr.total {
+            font-weight: 600;
+            background: var(--deep-blue-pale);
+        }
+
+        .result-table tr.total td {
+            color: var(--deep-blue);
+        }
+
+        /* FOOTER */
+        footer {
+            background: #1E3A5F;
+            color: var(--white);
+            padding: 32px 40px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo { font-size: 18px; font-weight: 700; }
+        .footer-text { font-size: 13px; opacity: 0.7; }
+
+        /* 마이 페이지 버튼 */
+        .btn-mypage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            background: var(--deep-blue);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            margin-bottom: 24px;
+        }
+
+        .btn-mypage:hover {
+            background: #1E40AF;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .process-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .process-step {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #6B7280;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .process-step:hover {
+            background: #F3F4F6;
+        }
+
+        .process-step.active {
+            background: #DBEAFE;
+            color: #1D4ED8;
+            font-weight: 600;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            color: #6B7280;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .process-step.active .step-number {
+            background: #1D4ED8;
+            color: white;
+        }
+
+        .step-text {
+            flex: 1;
+        }
+
+        /* 반응형 */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+            }
+
+            .method-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            /* Header */
+            header {
+                padding: 0 20px;
+                height: auto;
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px 20px;
+            }
+
+            .header-left {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                width: 100%;
+            }
+
+            .main-nav {
+                flex-wrap: wrap;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .nav-item {
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+
+            /* Breadcrumb */
+            .breadcrumb-container {
+                padding: 10px 20px;
+            }
+
+            .breadcrumb {
+                font-size: 12px;
+                flex-wrap: wrap;
+            }
+
+            /* Main Content */
+            .main-content {
+                padding: 20px;
+            }
+
+            /* Page Title */
+            .page-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+
+            .page-title-content h1 {
+                font-size: 22px;
+            }
+
+            .page-title-content p {
+                font-size: 14px;
+            }
+
+            /* Form Container */
+            .form-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            /* Form Section */
+            .form-section {
+                padding: 20px;
+            }
+
+            .form-section h2 {
+                font-size: 16px;
+            }
+
+            /* Form Row */
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .form-input {
+                font-size: 16px; /* iOS 자동 확대 방지 */
+            }
+
+            /* Projection Table - Convert to Card */
+            .projection-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .projection-table th,
+            .projection-table td {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+
+            .projection-table input {
+                padding: 6px;
+                font-size: 12px;
+            }
+
+            /* Buttons */
+            .btn-calculate,
+            .btn-portal {
+                width: 100%;
+                padding: 14px;
+                font-size: 15px;
+            }
+
+            /* Result Section */
+            .result-section {
+                padding: 24px 20px;
+            }
+
+            .result-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .result-summary {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .summary-card {
+                padding: 16px;
+            }
+
+            /* Result Grid */
+            .result-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            /* Result Table */
+            .result-table {
+                font-size: 12px;
+            }
+
+            .result-table th,
+            .result-table td {
+                padding: 8px;
+            }
+
+            /* Footer */
+            footer {
+                padding: 24px 20px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            /* Sidebar */
+            .sidebar {
+                width: 100%;
+                position: static;
+                margin-top: 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div id="header-container"></div>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">DCF 기업가치 평가</h1>
+            <p class="hero-subtitle">현금흐름할인법(Discounted Cash Flow)으로 기업의 본질가치를 산정합니다</p>
+            <div class="hero-badge">
+                <span>프로젝트 ID: </span>
+                <span id="hero-project-id">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="container">
+        <div class="main-area">
+    
+                <div class="form-container">
+                    <!-- 기본 정보 -->
+                    <div class="form-section">
+                        <h2>기본 정보</h2>
+                        <div class="form-group">
+                            <label>회사명</label>
+                            <input type="text" id="companyName" placeholder="평가 대상 회사명" value="파인더월드">
+                        </div>
+                        <div class="form-group">
+                            <label>평가 기준일</label>
+                            <input type="date" id="valuationDate" value="2025-01-31">
+                        </div>
+                        <div class="form-group">
+                            <label>발행주식수</label>
+                            <input type="number" id="sharesOutstanding" placeholder="1,000,000" value="5000000">
+                            <div class="unit">주</div>
+                        </div>
+                    </div>
+    
+                    <!-- 할인율 (WACC) -->
+                    <div class="form-section">
+                        <h2>할인율 (WACC)</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>무위험이자율 (Rf)</label>
+                                <input type="number" id="riskFreeRate" step="0.01" value="3.5" placeholder="3.5">
+                                <div class="unit">%</div>
+                            </div>
+                            <div class="form-group">
+                                <label>시장위험프리미엄 (MRP)</label>
+                                <input type="number" id="marketRiskPremium" step="0.01" value="7.0" placeholder="7.0">
+                                <div class="unit">%</div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>레버리지 베타 (β)</label>
+                                <input type="number" id="leveredBeta" step="0.01" value="1.25" placeholder="1.25">
+                            </div>
+                            <div class="form-group">
+                                <label>규모 프리미엄</label>
+                                <input type="number" id="sizePremium" step="0.01" value="2.0" placeholder="2.0">
+                                <div class="unit">%</div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>세전 타인자본비용</label>
+                                <input type="number" id="costOfDebt" step="0.01" value="4.8" placeholder="4.8">
+                                <div class="unit">%</div>
+                            </div>
+                            <div class="form-group">
+                                <label>법인세율</label>
+                                <input type="number" id="taxRate" step="0.01" value="25.0" placeholder="25.0">
+                                <div class="unit">%</div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>자기자본 비중</label>
+                                <input type="number" id="equityRatio" step="0.01" value="75.0" placeholder="75.0">
+                                <div class="unit">%</div>
+                            </div>
+                            <div class="form-group">
+                                <label>타인자본 비중</label>
+                                <input type="number" id="debtRatio" step="0.01" value="25.0" placeholder="25.0">
+                                <div class="unit">%</div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 16px; padding: 12px; background: var(--deep-blue-pale); border-radius: 8px;">
+                            <label style="color: var(--deep-blue);">계산된 WACC</label>
+                            <div style="font-size: 24px; font-weight: 700; color: var(--deep-blue);" id="calculatedWacc">12.87%</div>
+                        </div>
+                    </div>
+    
+                    <!-- FCFF 추정 (5년) -->
+                    <div class="form-section" style="grid-column: 1 / -1;">
+                        <h2>FCFF 추정 (5개년)</h2>
+                        <table class="projection-table">
+                            <thead>
+                                <tr>
+                                    <th>항목</th>
+                                    <th>1년차</th>
+                                    <th>2년차</th>
+                                    <th>3년차</th>
+                                    <th>4년차</th>
+                                    <th>5년차</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>매출액</td>
+                                    <td><input type="number" id="revenue1" value="34300000000"></td>
+                                    <td><input type="number" id="revenue2" value="44590000000"></td>
+                                    <td><input type="number" id="revenue3" value="54400000000"></td>
+                                    <td><input type="number" id="revenue4" value="62560000000"></td>
+                                    <td><input type="number" id="revenue5" value="68816000000"></td>
+                                </tr>
+                                <tr>
+                                    <td>EBIT</td>
+                                    <td><input type="number" id="ebit1" value="5488000000"></td>
+                                    <td><input type="number" id="ebit2" value="7134000000"></td>
+                                    <td><input type="number" id="ebit3" value="8704000000"></td>
+                                    <td><input type="number" id="ebit4" value="10010000000"></td>
+                                    <td><input type="number" id="ebit5" value="11011000000"></td>
+                                </tr>
+                                <tr>
+                                    <td>감가상각비</td>
+                                    <td><input type="number" id="dep1" value="515000000"></td>
+                                    <td><input type="number" id="dep2" value="669000000"></td>
+                                    <td><input type="number" id="dep3" value="816000000"></td>
+                                    <td><input type="number" id="dep4" value="938000000"></td>
+                                    <td><input type="number" id="dep5" value="1032000000"></td>
+                                </tr>
+                                <tr>
+                                    <td>CAPEX</td>
+                                    <td><input type="number" id="capex1" value="858000000"></td>
+                                    <td><input type="number" id="capex2" value="1115000000"></td>
+                                    <td><input type="number" id="capex3" value="1360000000"></td>
+                                    <td><input type="number" id="capex4" value="1564000000"></td>
+                                    <td><input type="number" id="capex5" value="1720000000"></td>
+                                </tr>
+                                <tr>
+                                    <td>운전자본 증감</td>
+                                    <td><input type="number" id="wc1" value="784000000"></td>
+                                    <td><input type="number" id="wc2" value="823000000"></td>
+                                    <td><input type="number" id="wc3" value="785000000"></td>
+                                    <td><input type="number" id="wc4" value="653000000"></td>
+                                    <td><input type="number" id="wc5" value="500000000"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+    
+                    <!-- 영구성장률 및 비영업 항목 -->
+                    <div class="form-section">
+                        <h2>Terminal Value</h2>
+                        <div class="form-group">
+                            <label>영구성장률</label>
+                            <input type="number" id="terminalGrowth" step="0.01" value="2.5" placeholder="2.5">
+                            <div class="unit">%</div>
+                        </div>
+                    </div>
+    
+                    <div class="form-section">
+                        <h2>비영업 항목</h2>
+                        <div class="form-group">
+                            <label>비영업자산</label>
+                            <input type="number" id="nonOperatingAssets" value="8000000000" placeholder="0">
+                            <div class="unit">원</div>
+                        </div>
+                        <div class="form-group">
+                            <label>이자부부채</label>
+                            <input type="number" id="interestBearingDebt" value="7000000000" placeholder="0">
+                            <div class="unit">원</div>
+                        </div>
+                    </div>
+    
+                    <!-- 계산 버튼 -->
+                    <div style="grid-column: 1 / -1;">
+                        <button class="btn-calculate" onclick="calculateDCF()">기업가치 평가 실행</button>
+                    </div>
+    
+                    <!-- 결과 섹션 -->
+                    <div class="result-section" id="resultSection">
+                        <div class="result-header">
+                            <h2>DCF 평가 결과</h2>
+                            <span id="resultCompanyName"></span>
+                        </div>
+    
+                        <div class="result-summary">
+                            <div class="summary-card">
+                                <label>영업가치</label>
+                                <div class="value" id="resultOperatingValue">-</div>
+                                <div class="sub">Operating Value</div>
+                            </div>
+                            <div class="summary-card">
+                                <label>기업가치</label>
+                                <div class="value" id="resultEnterpriseValue">-</div>
+                                <div class="sub">Enterprise Value</div>
+                            </div>
+                            <div class="summary-card">
+                                <label>주식가치</label>
+                                <div class="value" id="resultEquityValue">-</div>
+                                <div class="sub">Equity Value</div>
+                            </div>
+                            <div class="summary-card highlight">
+                                <label>주당가치</label>
+                                <div class="value" id="resultPerShare">-</div>
+                                <div class="sub">Value per Share</div>
+                            </div>
+                        </div>
+    
+                        <div class="result-grid">
+                            <div class="result-table-section">
+                                <h3>FCFF 현재가치</h3>
+                                <table class="result-table">
+                                    <thead>
+                                        <tr>
+                                            <th>연도</th>
+                                            <th>FCFF</th>
+                                            <th>할인계수</th>
+                                            <th>현재가치</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fcffTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+    
+                            <div class="result-table-section">
+                                <h3>가치 산출</h3>
+                                <table class="result-table">
+                                    <thead>
+                                        <tr>
+                                            <th>항목</th>
+                                            <th>금액</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="valueTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">ValueLink</div>
+            <div class="footer-text">© 2025 ValueLink. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <script>
+        // WACC 실시간 계산
+        function updateWacc() {
+            const rf = parseFloat(document.getElementById('riskFreeRate').value) / 100 || 0;
+            const mrp = parseFloat(document.getElementById('marketRiskPremium').value) / 100 || 0;
+            const beta = parseFloat(document.getElementById('leveredBeta').value) || 0;
+            const sizePremium = parseFloat(document.getElementById('sizePremium').value) / 100 || 0;
+            const costOfDebt = parseFloat(document.getElementById('costOfDebt').value) / 100 || 0;
+            const taxRate = parseFloat(document.getElementById('taxRate').value) / 100 || 0;
+            const equityRatio = parseFloat(document.getElementById('equityRatio').value) / 100 || 0;
+            const debtRatio = parseFloat(document.getElementById('debtRatio').value) / 100 || 0;
+
+            // Cost of Equity (CAPM)
+            const costOfEquity = rf + (beta * mrp) + sizePremium;
+
+            // After-tax Cost of Debt
+            const afterTaxCostOfDebt = costOfDebt * (1 - taxRate);
+
+            // WACC
+            const wacc = (equityRatio * costOfEquity) + (debtRatio * afterTaxCostOfDebt);
+
+            document.getElementById('calculatedWacc').textContent = (wacc * 100).toFixed(2) + '%';
+            return wacc;
+        }
+
+        // WACC 관련 입력 필드에 이벤트 리스너 추가
+        ['riskFreeRate', 'marketRiskPremium', 'leveredBeta', 'sizePremium',
+         'costOfDebt', 'taxRate', 'equityRatio', 'debtRatio'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateWacc);
+        });
+
+        // 숫자 포맷팅
+        function formatNumber(num) {
+            if (num >= 1000000000000) {
+                return (num / 1000000000000).toFixed(2) + '조';
+            } else if (num >= 100000000) {
+                return (num / 100000000).toFixed(1) + '억';
+            } else if (num >= 10000) {
+                return (num / 10000).toFixed(0) + '만';
+            }
+            return num.toLocaleString();
+        }
+
+        function formatWon(num) {
+            return num.toLocaleString() + '원';
+        }
+
+        // DCF 계산
+        function calculateDCF() {
+            const wacc = updateWacc();
+            const taxRate = parseFloat(document.getElementById('taxRate').value) / 100;
+            const terminalGrowth = parseFloat(document.getElementById('terminalGrowth').value) / 100;
+            const sharesOutstanding = parseInt(document.getElementById('sharesOutstanding').value);
+            const nonOperatingAssets = parseFloat(document.getElementById('nonOperatingAssets').value) || 0;
+            const interestBearingDebt = parseFloat(document.getElementById('interestBearingDebt').value) || 0;
+
+            // FCFF 계산 (각 연도)
+            const fcffData = [];
+            let pvCumulative = 0;
+
+            for (let i = 1; i <= 5; i++) {
+                const ebit = parseFloat(document.getElementById(`ebit${i}`).value) || 0;
+                const dep = parseFloat(document.getElementById(`dep${i}`).value) || 0;
+                const capex = parseFloat(document.getElementById(`capex${i}`).value) || 0;
+                const wc = parseFloat(document.getElementById(`wc${i}`).value) || 0;
+
+                const nopat = ebit * (1 - taxRate);
+                const fcff = nopat + dep - capex - wc;
+                const discountFactor = 1 / Math.pow(1 + wacc, i);
+                const pv = fcff * discountFactor;
+
+                pvCumulative += pv;
+
+                fcffData.push({
+                    year: i + '년차',
+                    fcff: fcff,
+                    discountFactor: discountFactor,
+                    pv: pv
+                });
+            }
+
+            // 영구성장률 검증
+            if (terminalGrowth >= wacc) {
+                alert('⚠️ 오류: 영구성장률(' + (terminalGrowth * 100).toFixed(2) + '%)이 WACC(' + (wacc * 100).toFixed(2) + '%) 이상입니다.\n영구성장률은 WACC보다 작아야 합니다.');
+                return;
+            }
+
+            // Terminal Value
+            const lastFcff = fcffData[4].fcff;
+            const terminalFcff = lastFcff * (1 + terminalGrowth);
+            const terminalValue = terminalFcff / (wacc - terminalGrowth);
+            const pvTerminal = terminalValue / Math.pow(1 + wacc, 5);
+
+            // 가치 계산
+            const operatingValue = pvCumulative + pvTerminal;
+            const enterpriseValue = operatingValue + nonOperatingAssets;
+            const equityValue = enterpriseValue - interestBearingDebt;
+
+            if (sharesOutstanding <= 0) {
+                alert('⚠️ 오류: 발행주식수를 확인해 주세요.');
+                return;
+            }
+
+            const valuePerShare = equityValue / sharesOutstanding;
+
+            // 결과 표시
+            document.getElementById('resultSection').classList.add('show');
+            document.getElementById('resultCompanyName').textContent =
+                document.getElementById('companyName').value || '평가 대상 기업';
+
+            document.getElementById('resultOperatingValue').textContent = formatNumber(operatingValue);
+            document.getElementById('resultEnterpriseValue').textContent = formatNumber(enterpriseValue);
+            document.getElementById('resultEquityValue').textContent = formatNumber(equityValue);
+            document.getElementById('resultPerShare').textContent = Math.round(valuePerShare).toLocaleString() + '원';
+
+            // FCFF 테이블
+            let fcffHtml = '';
+            fcffData.forEach(data => {
+                fcffHtml += `
+                    <tr>
+                        <td>${data.year}</td>
+                        <td>${formatNumber(data.fcff)}</td>
+                        <td>${data.discountFactor.toFixed(4)}</td>
+                        <td>${formatNumber(data.pv)}</td>
+                    </tr>
+                `;
+            });
+            fcffHtml += `
+                <tr>
+                    <td>Terminal</td>
+                    <td>${formatNumber(terminalValue)}</td>
+                    <td>${(1 / Math.pow(1 + wacc, 5)).toFixed(4)}</td>
+                    <td>${formatNumber(pvTerminal)}</td>
+                </tr>
+                <tr class="total">
+                    <td>합계</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>${formatNumber(pvCumulative + pvTerminal)}</td>
+                </tr>
+            `;
+            document.getElementById('fcffTableBody').innerHTML = fcffHtml;
+
+            // 가치 산출 테이블
+            const valueHtml = `
+                <tr>
+                    <td>FCFF 현재가치 합계</td>
+                    <td>${formatNumber(pvCumulative)}</td>
+                </tr>
+                <tr>
+                    <td>Terminal Value 현재가치</td>
+                    <td>${formatNumber(pvTerminal)}</td>
+                </tr>
+                <tr class="total">
+                    <td>영업가치</td>
+                    <td>${formatNumber(operatingValue)}</td>
+                </tr>
+                <tr>
+                    <td>(+) 비영업자산</td>
+                    <td>${formatNumber(nonOperatingAssets)}</td>
+                </tr>
+                <tr class="total">
+                    <td>기업가치</td>
+                    <td>${formatNumber(enterpriseValue)}</td>
+                </tr>
+                <tr>
+                    <td>(-) 이자부부채</td>
+                    <td>${formatNumber(interestBearingDebt)}</td>
+                </tr>
+                <tr class="total">
+                    <td>주식가치</td>
+                    <td>${formatNumber(equityValue)}</td>
+                </tr>
+                <tr>
+                    <td>발행주식수</td>
+                    <td>${sharesOutstanding.toLocaleString()}주</td>
+                </tr>
+                <tr class="total">
+                    <td>주당가치</td>
+                    <td>${Math.round(valuePerShare).toLocaleString()}원</td>
+                </tr>
+            `;
+            document.getElementById('valueTableBody').innerHTML = valueHtml;
+
+            // 결과 섹션으로 스크롤
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 초기 WACC 계산
+        updateWacc();
+    </script>
+
+    <!-- 사이드바 초기화 -->
+    <!-- Header Load Script -->
+    <script>
+        fetch('../../../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+                const scripts = document.getElementById('header-container').querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+
+        // Hero section에 프로젝트 ID 표시
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('projectId') || '-';
+        const heroProjectId = document.getElementById('hero-project-id');
+        if (heroProjectId) heroProjectId.textContent = projectId;
+    </script>
+
+    <script>
+    window.addEventListener('load', function() {
+        if (typeof calculateDCF === 'function') calculateDCF();
+    });
+    </script>
+</body>
+</html>

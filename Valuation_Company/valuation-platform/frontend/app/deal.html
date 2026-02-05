@@ -1,0 +1,2497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deal News - 투자받은 스타트업 | ValueLink</title>
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="styles/mobile-optimize.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --deep-green: #166534;
+            --deep-blue: #1D4ED8;
+            --amber: #F59E0B;
+            --amber-dark: #B45309;
+            --amber-pale: #FEF3C7;
+            --deep-blue-pale: #DBEAFE;
+            --deep-green-pale: #DCFCE7;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6B7280;
+            --bg-light: #F3F4F6;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        /* HERO - Deals Theme (주황색 - 투자 정보) */
+        .hero {
+            background: linear-gradient(135deg, #B45309 0%, #F59E0B 60%, #FCD34D 100%);
+            padding: 40px 0 50px 0;
+            text-align: center;
+            color: var(--white);
+        }
+
+        .hero-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .hero-description {
+            font-size: 19px;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* STATS */
+        .stats-bar {
+            background: var(--white);
+            padding: 24px 0;
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--amber-dark);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* MAIN */
+        .main-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 48px 0 40px 0;
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        .content-main {
+            flex: 1;
+        }
+
+        /* 우측 사이드바 */
+        .sidebar {
+            width: 300px;
+            min-width: 300px;
+            flex-shrink: 0;
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+            position: sticky;
+            top: 24px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--amber-dark);
+            background: var(--amber-pale);
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            border-radius: 8px;
+        }
+
+        .news-provider-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .news-provider-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .news-provider-item:hover {
+            background: var(--amber-pale);
+            color: var(--amber-dark);
+        }
+
+        .provider-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            color: #6B7280;
+            font-size: 12px;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .news-provider-item:hover .provider-number {
+            background: var(--amber);
+            color: white;
+        }
+
+        .provider-name {
+            flex: 1;
+        }
+
+        /* 뉴스 섹션 */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 24px;
+            font-weight: 400;
+        }
+
+        .view-all {
+            font-size: 14px;
+            color: var(--amber);
+            text-decoration: none;
+            font-weight: 400;
+        }
+
+        .view-all:hover {
+            text-decoration: underline;
+        }
+
+        /* 뉴스 카드 그리드 */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .news-card {
+            background: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #E5E7EB;
+            transition: all 0.3s ease;
+        }
+
+        .news-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+
+        .news-content {
+            padding: 20px;
+        }
+
+        .news-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .news-link-btn {
+            flex-shrink: 0;
+            background: var(--amber-pale);
+            color: var(--amber-dark);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 400;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .news-link-btn:hover {
+            background: #FDE68A;
+        }
+
+        .news-meta {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .news-source {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--amber-dark);
+            background: var(--amber-pale);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .news-date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .news-title {
+            font-size: 16px;
+            font-weight: 400;
+            color: var(--text-primary);
+            line-height: 1.5;
+            margin-bottom: 12px;
+            height: 48px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            word-break: break-word;
+        }
+
+        .news-company {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid #F3F4F6;
+        }
+
+        .company-badge {
+            width: 36px;
+            height: 36px;
+            background: var(--deep-green-pale);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-name-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .company-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* 홈페이지 바로가기 */
+        .company-website {
+            font-size: 11px;
+            color: var(--deep-blue);
+            text-decoration: none;
+            padding: 2px 6px;
+            background: var(--deep-blue-pale);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .company-website:hover {
+            background: #BFDBFE;
+        }
+
+        .company-details {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .company-details span {
+            margin-right: 8px;
+        }
+
+        /* 최근 딜 테이블 */
+        .deals-section {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 20px 32px 32px 32px;
+            margin-top: 0;
+        }
+
+        .deals-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+
+        .deals-table th {
+            text-align: center;
+            padding: 16px 12px;
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-muted);
+            border-bottom: 2px solid #E5E7EB;
+            white-space: nowrap;
+        }
+
+        /* 컬럼별 너비 조정 (7개 컬럼: No. 추가) */
+        .deals-table th:nth-child(1) { width: 3%; }  /* No. */
+        .deals-table th:nth-child(2) { width: 12%; } /* 기업명 */
+        .deals-table th:nth-child(3) { width: 11%; } /* 주요사업 */
+        .deals-table th:nth-child(4) { width: 24%; } /* 투자사유 */
+        .deals-table th:nth-child(5) { width: 6%; }  /* 투자단계 */
+        .deals-table th:nth-child(6) { width: 19%; } /* 투자자 */
+        .deals-table th:nth-child(7) { width: 8%; }  /* 투자금액 */
+        .deals-table th:nth-child(8) { width: 5%; }  /* 뉴스 */
+
+        .deals-table td {
+            padding: 10px 8px;
+            font-size: 14px;
+            border-bottom: 1px solid #F3F4F6;
+            vertical-align: middle;
+        }
+
+        .deals-table tr:hover {
+            background: #FEFCE8;
+        }
+
+        /* 투자자 셀 스타일 - 자동 줄바꿈 */
+        /* 페이지네이션 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            padding: 20px 0;
+        }
+
+        .pagination button {
+            min-width: 36px;
+            height: 36px;
+            border: 1px solid #D1D5DB;
+            background: var(--white);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .pagination button:hover:not(:disabled):not(.active) {
+            background: #F3F4F6;
+            border-color: #9CA3AF;
+        }
+
+        .pagination button.active {
+            background: var(--amber);
+            color: white;
+            border-color: var(--amber);
+            font-weight: 600;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        .pagination .ellipsis {
+            min-width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .pagination-info {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            padding-bottom: 12px;
+        }
+
+        .deal-investors {
+            font-size: 12px !important;
+            color: var(--text-secondary) !important;
+            line-height: 1.6 !important;
+            white-space: normal !important;
+            max-width: 100% !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 3 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+        }
+
+        .deal-company {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .deal-logo {
+            width: 44px;
+            height: 44px;
+            background: var(--bg-light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .deal-name {
+            font-size: 14px !important;
+            font-weight: 400;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .deal-industry {
+            font-size: 12px !important;
+            color: var(--text-muted) !important;
+            line-height: 1.4 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+
+        .deal-amount {
+            font-size: 14px !important;
+            font-weight: 400;
+            color: var(--deep-green);
+        }
+
+        .deal-reason {
+            font-size: 12px !important;
+            color: #6B7280 !important;
+            line-height: 1.4 !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+        }
+
+        .deal-stage {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 400;
+            border-radius: 10px;
+            white-space: normal;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .stage-seed { background: #DCFCE7; color: #166534; }
+        .stage-prea { background: #DBEAFE; color: #1D4ED8; }
+        .stage-a { background: #FEF3C7; color: #B45309; }
+        .stage-b { background: #FCE7F3; color: #BE185D; }
+        .stage-c { background: #E0E7FF; color: #4338CA; }
+
+        .deal-region {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .deal-employees {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .deal-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .link-btn {
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 400;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .link-news {
+            background: var(--amber-pale);
+            color: var(--amber-dark);
+        }
+
+        .link-news:hover {
+            background: #FDE68A;
+        }
+
+        .link-website {
+            background: var(--deep-blue-pale);
+            color: var(--deep-blue);
+        }
+
+        .link-website:hover {
+            background: #BFDBFE;
+        }
+
+        .deal-founded {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .deal-total-funding {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #1E3A5F;
+            color: var(--white);
+            padding: 32px 40px;
+            margin-top: 60px;
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 1024px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Hero Section */
+            .hero {
+                padding: 24px 20px 32px 20px;
+            }
+
+            .hero-title {
+                font-size: 28px;
+            }
+
+            .hero-description {
+                font-size: 14px;
+            }
+
+            /* Stats Bar */
+            .stats-bar {
+                padding: 20px;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .stat-value {
+                font-size: 28px;
+            }
+
+            /* Main Content */
+            .main-content {
+                padding: 24px 20px;
+            }
+
+            /* News Grid - 1열로 변경 */
+            .news-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            /* Section Title */
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .section-header h2 {
+                font-size: 20px;
+            }
+
+            /* Filter Bar - 세로 정렬 */
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 16px;
+            }
+
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 4px;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+
+            /* Deals Section */
+            .deals-section {
+                padding: 20px;
+                overflow-x: auto;
+            }
+
+            /* 테이블을 카드 형식으로 변경 */
+            .deals-table {
+                display: block;
+            }
+
+            .deals-table thead {
+                display: none;
+            }
+
+            .deals-table tbody {
+                display: block;
+            }
+
+            .deals-table tr {
+                display: block;
+                margin-bottom: 16px;
+                padding: 16px;
+                background: var(--bg-light);
+                border-radius: 12px;
+                border: none;
+            }
+
+            .deals-table td {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                border-bottom: 1px solid #E5E7EB;
+            }
+
+            .deals-table td:last-child {
+                border-bottom: none;
+            }
+
+            .deals-table td::before {
+                content: attr(data-label);
+                font-weight: 400;
+                color: var(--text-muted);
+                font-size: 12px;
+            }
+
+            .deal-company {
+                justify-content: flex-end;
+            }
+
+            /* Footer */
+            footer {
+                padding: 24px 20px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .footer-text {
+                font-size: 12px;
+            }
+        }
+
+        /* Tablet (768px ~ 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .news-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .main-content {
+                padding: 32px;
+            }
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo { font-size: 18px; font-weight: 400; }
+        .footer-text { font-size: 13px; opacity: 0.7; }
+
+        /* 필터 바 */
+        .filter-bar {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 4px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            font-size: 13px;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--amber);
+        }
+
+        /* 더보기 버튼 - 주황색 테두리 */
+        .btn-see-more {
+            padding: 8px 16px;
+            background: transparent;
+            color: var(--amber);
+            border: 1px solid var(--amber);
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 16px;
+        }
+
+        .btn-see-more:hover {
+            background: var(--amber);
+            color: white;
+        }
+
+        /* 구독 신청 버튼 - 강조 스타일 */
+        .btn-subscribe {
+            padding: 10px 24px;
+            background: var(--amber);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-subscribe:hover {
+            background: var(--amber-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+
+        /* 구독 모달 */
+        .subscribe-modal {
+            display: none;
+            position: fixed;
+            z-index: 99999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .subscribe-modal-content {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 32px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #e5e7eb;
+            color: #374151;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #d1d5db;
+        }
+
+        .subscribe-modal h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .subscribe-modal p {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .subscribe-form .form-group {
+            margin-bottom: 16px;
+        }
+
+        .subscribe-form label {
+            display: block;
+            font-size: 13px;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .subscribe-form label .required {
+            color: #EF4444;
+        }
+
+        .subscribe-form input {
+            width: 100%;
+            padding: 12px;
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            color: #111827;
+            font-size: 14px;
+        }
+
+        .subscribe-form input:focus {
+            outline: none;
+            border-color: var(--amber);
+        }
+
+        .subscribe-form .checkbox-group {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .subscribe-form .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #111827;
+            cursor: pointer;
+        }
+
+        .subscribe-form .checkbox-label input[type="checkbox"] {
+            width: auto;
+        }
+
+        .btn-submit-subscribe {
+            width: 100%;
+            padding: 14px;
+            background: var(--amber);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-submit-subscribe:hover {
+            background: var(--amber-dark);
+        }
+
+        .btn-submit-subscribe:disabled {
+            background: #6B7280;
+            cursor: not-allowed;
+        }
+
+        /* 뉴스 모달 */
+        .news-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .news-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .news-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 32px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .news-modal-header h2 {
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .news-modal-close {
+            font-size: 32px;
+            color: #6B7280;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .news-modal-close:hover {
+            background: #F3F4F6;
+            color: var(--text-primary);
+        }
+
+        .news-modal-body {
+            padding: 24px 32px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-news-item {
+            padding: 20px;
+            border-bottom: 1px solid #E5E7EB;
+            transition: all 0.3s;
+        }
+
+        .modal-news-item:hover {
+            background: var(--amber-pale);
+        }
+
+        .modal-news-item:last-child {
+            border-bottom: none;
+        }
+
+        .modal-news-date {
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 4px;
+        }
+
+        .modal-news-site {
+            display: inline-block;
+            font-size: 11px;
+            color: var(--amber-dark);
+            background: var(--amber-pale);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .modal-news-title {
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .modal-news-title a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .modal-news-title a:hover {
+            color: var(--amber-dark);
+        }
+
+        /* 기업 상세 정보 모달 */
+        .detail-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .detail-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .detail-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 32px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .detail-modal-header h2 {
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .detail-modal-close {
+            font-size: 32px;
+            color: #6B7280;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .detail-modal-close:hover {
+            background: #F3F4F6;
+            color: var(--text-primary);
+        }
+
+        .detail-modal-body {
+            padding: 32px;
+        }
+
+        .detail-row {
+            display: flex;
+            padding: 16px 0;
+            border-bottom: 1px solid #F3F4F6;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            width: 140px;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+
+        .detail-value {
+            flex: 1;
+            color: var(--text-primary);
+        }
+
+        .detail-value a {
+            color: var(--amber-dark);
+            text-decoration: none;
+        }
+
+        .detail-value a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div id="header-container"></div>
+
+    <!-- HERO -->
+    <section class="hero">
+        <h1 class="hero-title">Deals</h1>
+        <p class="hero-description">
+            투자유치 뉴스를 추적하여 투자받은 기업의 현황 및 IR 정보를 함께 제공합니다
+        </p>
+    </section>
+
+    <!-- MAIN -->
+    <main class="main-content">
+        <div class="content-main">
+            <!-- 최신 투자유치 뉴스 (최신 3개) -->
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <h2>최신 투자유치 뉴스</h2>
+                    <button class="btn-see-more" onclick="openNewsModal()">
+                        더보기 →
+                    </button>
+                </div>
+                <button class="btn-subscribe" onclick="openSubscribeModal()">
+                    뉴스레터 구독 신청
+                </button>
+            </div>
+
+        <div class="news-grid" id="news-grid">
+            <!-- 실제 데이터가 JavaScript로 로드됩니다 (최신 3개만) -->
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #6B7280;">
+                데이터 로딩 중...
+            </div>
+        </div>
+
+        <!-- 투자유치 기업 목록 -->
+        <div class="section-header">
+            <h2>투자유치 기업 목록</h2>
+        </div>
+
+        <div class="deals-section">
+            <!-- 필터 -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <span class="filter-label">업종</span>
+                    <select class="filter-select" id="filter-industry">
+                        <option value="">전체</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">투자 단계 <span onclick="document.getElementById('stageGuideModal').style.display='flex'" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:#4f46e5; color:#fff; font-size:11px; font-weight:700; font-style:italic; font-family:serif; vertical-align:middle; margin-left:2px;" title="투자단계 설명 보기">i</span></span>
+                    <select class="filter-select" id="filter-stage">
+                        <option value="">전체</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">기간</span>
+                    <select class="filter-select" id="filter-period">
+                        <option>최근 1주</option>
+                        <option>최근 1개월</option>
+                        <option>최근 3개월</option>
+                        <option>최근 1년</option>
+                    </select>
+                </div>
+            </div>
+
+            <table class="deals-table">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>기업명</th>
+                        <th>주요사업</th>
+                        <th>투자사유</th>
+                        <th>투자단계</th>
+                        <th>투자자</th>
+                        <th>투자금액</th>
+                        <th>뉴스</th>
+                    </tr>
+                </thead>
+                <tbody id="deals-tbody">
+                    <!-- 실제 데이터가 JavaScript로 로드됩니다 -->
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: #6B7280;">
+                            데이터 로딩 중...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="deals-pagination"></div>
+        </div>
+        </div>
+
+        <!-- 우측 사이드바 -->
+        <aside class="sidebar">
+            <!-- 투자 통계 (2026-01-26 기준) -->
+            <!-- TODO: 현재는 뉴스 기사 수로 표시. 나중에 Deal 테이블의 실제 투자 데이터로 변경 필요 -->
+            <!-- - Deal 테이블의 investment_date 필드 기준으로 계산 -->
+            <!-- - 중복 기업 제거 (같은 기업이 여러 투자 라운드 받은 경우) -->
+            <!-- - 정확한 투자유치 기업 수로 업데이트 -->
+            <div style="margin-bottom: 24px;">
+                <div class="stat-item" style="margin-bottom: 16px; padding: 16px; background: var(--amber-pale); border-radius: 12px;">
+                    <div class="stat-value" id="stat-yesterday" style="font-size: 20px; font-weight: 400; color: var(--amber-dark);">-</div>
+                    <div class="stat-label" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">어제 투자유치 기업 수</div>
+                </div>
+                <div class="stat-item" style="margin-bottom: 16px; padding: 16px; background: var(--amber-pale); border-radius: 12px;">
+                    <div class="stat-value" id="stat-last-week" style="font-size: 20px; font-weight: 400; color: var(--amber-dark);">-</div>
+                    <div class="stat-label" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">지난주 투자유치 기업 수</div>
+                </div>
+                <div class="stat-item" style="margin-bottom: 16px; padding: 16px; background: var(--amber-pale); border-radius: 12px;">
+                    <div class="stat-value" id="stat-year-total" style="font-size: 20px; font-weight: 400; color: var(--amber-dark);">-</div>
+                    <div class="stat-label" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">금년 누적 투자유치 기업 수</div>
+                </div>
+            </div>
+
+            <div class="sidebar-title">Investment News Network</div>
+            <div class="news-provider-list" id="news-provider-list">
+                <!-- 더VC (1번) + 5개 뉴스 소스 (2-6번) -->
+                <a href="https://thevc.kr" target="_blank" class="news-provider-item">
+                    <span class="provider-number">1</span>
+                    <span class="provider-name">더VC</span>
+                </a>
+                <a href="https://www.wowtale.net" target="_blank" class="news-provider-item">
+                    <span class="provider-number">2</span>
+                    <span class="provider-name">WOWTALE</span>
+                </a>
+                <a href="https://www.venturesquare.net" target="_blank" class="news-provider-item">
+                    <span class="provider-number">3</span>
+                    <span class="provider-name">벤처스퀘어</span>
+                </a>
+                <a href="https://startuptoday.kr" target="_blank" class="news-provider-item">
+                    <span class="provider-number">4</span>
+                    <span class="provider-name">스타트업투데이</span>
+                </a>
+                <a href="https://outstanding.kr" target="_blank" class="news-provider-item">
+                    <span class="provider-number">5</span>
+                    <span class="provider-name">아웃스탠딩</span>
+                </a>
+                <a href="https://platum.kr" target="_blank" class="news-provider-item">
+                    <span class="provider-number">6</span>
+                    <span class="provider-name">플래텀</span>
+                </a>
+            </div>
+        </aside>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">ValueLink</div>
+            <div class="footer-text">© 2026 ValueLink. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <script>
+        // 헤더 로드
+        fetch('../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                const container = document.getElementById('header-container');
+                container.innerHTML = data;
+
+                // 삽입된 script 태그를 수동으로 실행
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+
+        const API_BASE = 'http://localhost:8000/api/v1/investment-tracker';
+
+        // Supabase 설정
+        const SUPABASE_URL = 'https://arxrfetgaitkgiiqabap.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeHJmZXRnYWl0a2dpaXFhYmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3ODk1OTgsImV4cCI6MjA4NDM2NTU5OH0.BTnuv0sYr2MGe1c-gk8PWCviwkFyIiymfKp5Jhzwbo0';
+
+        // 페이지네이션
+        let currentPage = 1;
+        const PAGE_SIZE = 20;
+        let currentDeals = [];
+
+        // 페이지 로드 시 실행
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('페이지 로드됨');
+
+            // Supabase에서 데이터 로드
+            // loadDashboardStats(); // 백엔드 API 서버 불필요 - 제거
+            loadLatestNews();
+            // loadNewsProviders(); // HTML 하드코딩 사용 (더VC 1번 + 5개 뉴스 소스)
+            // loadInvestmentStats(); // loadDeals에서 통계 계산 - 중복 제거
+            loadDeals(); // Deal 테이블 로드 (통계도 함께 계산)
+            setupFilters(); // 필터 이벤트 리스너 설정
+        });
+
+        // 대시보드 통계 로드
+        async function loadDashboardStats() {
+            try {
+                console.log('통계 API 호출 중...');
+                const res = await fetch(`${API_BASE}/dashboard/stats`);
+                const data = await res.json();
+                console.log('통계 데이터:', data);
+
+                const statValues = document.querySelectorAll('.stat-value');
+                if (statValues.length >= 4) {
+                    statValues[0].textContent = data.total_companies?.toLocaleString() || '0';
+                    statValues[1].textContent = data.total_news?.toLocaleString() || '0';
+                    statValues[2].textContent = (data.total_funding_krw / 10000)?.toFixed(1) + '조' || '0조';
+                    statValues[3].textContent = data.this_week_new_companies?.toLocaleString() || '0';
+                }
+            } catch (err) {
+                console.error('통계 로드 실패:', err);
+            }
+        }
+
+        // 최신 뉴스 로드 - Deal 테이블에서 최신 3개 가져오기
+        async function loadLatestNews() {
+            try {
+                console.log('최신 뉴스 로딩 중...');
+
+                // Deal 테이블에서 최신 3개 가져오기 (news_date 기준, news_title이 있는 것만)
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/deals?select=company_name,stage,amount,news_title,news_url,site_name,news_date,created_at&news_title=not.is.null&order=news_date.desc&limit=3`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+
+                if (response.ok) {
+                    const deals = await response.json();
+                    console.log('최신 Deal 뉴스:', deals);
+
+                    if (deals && deals.length > 0) {
+                        const newsItems = deals.map(deal => {
+                            // 언론사 필터링
+                            let siteName = deal.site_name || '미디어';
+                            const invalidSites = ['네이버 뉴스', 'Google News', 'VC 포트폴리오'];
+                            if (invalidSites.includes(siteName)) {
+                                siteName = '미디어';
+                            }
+
+                            return {
+                                title: deal.news_title || `${deal.company_name} ${deal.stage} 투자 유치`,
+                                source: siteName,
+                                source_url: deal.news_url || '#',
+                                date: deal.news_date,
+                                created_at: deal.created_at,
+                                company: deal.company_name || '-',
+                                stage: deal.stage || '-',
+                                amount: deal.amount ? `${deal.amount}억원` : '비공개'
+                            };
+                        });
+
+                        renderNewsCards(newsItems);
+                    } else {
+                        console.log('DB에 Deal 없음');
+                        showNewsError('수집된 투자 뉴스가 없습니다.');
+                    }
+                } else {
+                    console.log('Supabase 조회 실패:', response.status);
+                    showNewsError('데이터를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
+                }
+            } catch (err) {
+                console.log('뉴스 로딩 실패:', err.message);
+                showNewsError('데이터를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
+            }
+        }
+
+        // 뉴스 로딩 에러 표시
+        function showNewsError(message) {
+            const newsGrid = document.getElementById('news-grid');
+            if (!newsGrid) return;
+
+            newsGrid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #6B7280;">
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // 뉴스 카드 렌더링 (새 레이아웃: 소스+시간, 제목, 회사명|투자단계|금액)
+        function renderNewsCards(newsItems) {
+            const newsGrid = document.getElementById('news-grid');
+            if (!newsGrid) return;
+
+            newsGrid.innerHTML = newsItems.map((news) => {
+                const source = news.source || '미디어';
+                const title = news.title || '제목 없음';
+                const url = news.source_url || '#';
+                const company = news.company || '-';
+                const stage = news.stage || '-';
+                const amount = news.amount || '비공개';
+                const datetime = formatDateTime(news.date, news.created_at);
+
+                return `
+                    <div class="news-card">
+                        <div class="news-content">
+                            <!-- 1행: 소스 + 연월일시 -->
+                            <div class="news-header" style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center; font-size: 13px;">
+                                <span class="news-source" style="font-weight: 400; color: var(--amber-dark); background: var(--amber-pale); padding: 4px 10px; border-radius: 6px;">[${escapeHtml(source)}]</span>
+                                <span class="news-datetime" style="color: var(--text-muted); font-size: 13px;">${datetime}</span>
+                            </div>
+
+                            <!-- 2행: 제목 + 원문 링크 -->
+                            <div class="news-title-row">
+                                <h3 class="news-title" style="margin-bottom: 0; font-weight: 400;">${escapeHtml(title)}</h3>
+                                <a href="${url}" target="_blank" class="news-link-btn">원문</a>
+                            </div>
+
+                            <!-- 3행: 회사명 | 투자단계 | 금액 -->
+                            <div class="news-deal-info" style="display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #F3F4F6; font-size: 14px; color: var(--text-secondary);">
+                                <span class="deal-company" style="font-weight: 400; color: var(--text-primary);">${escapeHtml(company)}</span>
+                                <span class="deal-separator" style="color: #D1D5DB; font-weight: 300;">|</span>
+                                <span class="deal-stage" style="color: var(--deep-green);">${escapeHtml(stage)}</span>
+                                <span class="deal-separator" style="color: #D1D5DB; font-weight: 300;">|</span>
+                                <span class="deal-amount" style="color: ${amount === '비공개' ? 'var(--text-muted)' : 'var(--amber-dark)'}; font-weight: 400; ${amount === '비공개' ? 'font-style: italic;' : ''}">${escapeHtml(amount)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 시간 포맷 함수 (YYYY-MM-DD HH:MM)
+        function formatDateTime(publishedDate, createdAt) {
+            // news_date(실제 뉴스 발행일)만 사용
+            if (!publishedDate) return '-';
+
+            // YYYY-MM-DD 형식이면 그대로 반환
+            if (publishedDate.length === 10) {
+                return publishedDate;
+            }
+
+            // ISO 8601 형식 (시간 포함)이면 YYYY-MM-DD만 추출
+            const date = new Date(publishedDate);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        }
+
+        // 뉴스 테이블 렌더링 - 상세 정보 표시
+        function renderNewsTable(newsItems) {
+            const tbody = document.getElementById('deals-tbody');
+            if (!tbody) return;
+
+            tbody.innerHTML = newsItems.map(news => {
+                const company = news.company || extractCompanyName(news.title);
+                const ceo = news.ceo || '-';
+                const url = news.source_url || '#';
+                const industry = news.industry || extractIndustry(news.title);
+                const stage = news.stage || extractStage(news.title);
+                const amount = news.amount ? (typeof news.amount === 'number' ? `${news.amount}억원` : news.amount) : '비공개';
+                const totalFunding = news.totalFunding || '-';
+                const investor = news.investor || '-';
+                const founded = news.founded || '-';
+                const employees = news.employees || '-';
+                const region = news.region || '-';
+
+                // 투자자 콤마로 구분, 두 줄로 표시 (5개까지만)
+                let investorList = '-';
+                if (investor !== '-') {
+                    const investorArray = investor.split(',').map(inv => inv.trim());
+                    if (investorArray.length <= 5) {
+                        // 5개 이하면 전부 표시 (콤마 + 공백으로 구분)
+                        investorList = investorArray.map(inv => escapeHtml(inv)).join(', ');
+                    } else {
+                        // 5개 초과면 처음 5개만 표시 + 나머지 개수
+                        const first5 = investorArray.slice(0, 5).map(inv => escapeHtml(inv)).join(', ');
+                        const remaining = investorArray.length - 5;
+                        investorList = `${first5} <span style="color: #6B7280; font-size: 11px; font-weight: 400;">+${remaining}개</span>`;
+                    }
+                }
+
+                const dealData = JSON.stringify({
+                    company, ceo, founded, totalFunding: totalFunding, industry, location: region, stage, investors: investor, amount, newsUrl: url
+                }).replace(/"/g, '&quot;');
+
+                return `
+                    <tr onclick='showDealDetail(${dealData})' style="cursor: pointer;">
+                        <td data-label="기업명"><div class="deal-name">${escapeHtml(company)}</div></td>
+                        <td data-label="주요사업" class="deal-industry">${escapeHtml(industry)}</td>
+                        <td data-label="투자단계"><span class="deal-stage ${getStageClass(stage)}">${escapeHtml(stage)}</span></td>
+                        <td data-label="투자자" class="deal-investors">${investorList}</td>
+                        <td data-label="투자금액" class="deal-amount">${escapeHtml(amount)}</td>
+                        <td data-label="뉴스"><a href="${url}" target="_blank" class="link-btn link-news" onclick="event.stopPropagation();">원문</a></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Deal 테이블 로드 (Supabase에서)
+        async function loadDeals() {
+            currentPage = 1;
+            try {
+                console.log('Deal 테이블 로딩 중...');
+
+                // Supabase에서 Deal 데이터 가져오기 (number 순서대로 정렬)
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/deals?select=*&order=news_date.desc,number.desc`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+
+                if (response.ok) {
+                    const deals = await response.json();
+                    console.log('Deal 데이터:', deals.length, '개');
+
+                    if (deals && deals.length > 0) {
+                        // 통계 계산
+                        const now = new Date();
+                        const today = now.toISOString().split('T')[0];
+                        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                        const yearStart = `${now.getFullYear()}-01-01`;
+
+                        const yesterdayCount = deals.filter(d => d.news_date === yesterday).length;
+                        const lastWeekCount = deals.filter(d => d.news_date >= oneWeekAgo && d.news_date <= today).length;
+                        const yearTotalCount = deals.length; // 전체 Deal 수
+
+                        // 통계 업데이트
+                        document.getElementById('stat-yesterday').textContent = yesterdayCount;
+                        document.getElementById('stat-last-week').textContent = lastWeekCount;
+                        document.getElementById('stat-year-total').textContent = yearTotalCount;
+
+                        renderDealsTable(deals);
+                    } else {
+                        console.log('DB에 Deal 없음');
+                        const tbody = document.getElementById('deals-tbody');
+                        if (tbody) {
+                            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #6B7280;">투자 유치 데이터가 없습니다.</td></tr>';
+                        }
+                    }
+                } else {
+                    console.log('Deal 조회 실패');
+                }
+            } catch (err) {
+                console.log('Deal 로딩 실패:', err.message);
+            }
+        }
+
+        // 필터 설정
+        async function setupFilters() {
+            // 필터 옵션 동적 생성
+            await populateFilterOptions();
+
+            const filterSelects = document.querySelectorAll('.filter-select');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', filterDeals);
+            });
+        }
+
+        // 필터 옵션 동적 생성
+        async function populateFilterOptions() {
+            try {
+                // 업종 필터 - DB에서 카테고리 목록 가져오기
+                const indResponse = await fetch(`${SUPABASE_URL}/rest/v1/deals?select=industry_category&industry_category=not.is.null&order=industry_category.asc`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+
+                if (indResponse.ok) {
+                    const indData = await indResponse.json();
+                    const categories = [...new Set(indData.map(d => d.industry_category).filter(Boolean))].sort();
+
+                    const industrySelect = document.getElementById('filter-industry');
+                    categories.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat;
+                        option.textContent = cat;
+                        industrySelect.appendChild(option);
+                    });
+                }
+
+                // 투자 단계 필터 - 고정 목록
+                const allStages = [
+                    '프리시드', '시드', '프리A', '프리A 브릿지',
+                    '시리즈A', '시리즈B', '시리즈C', '시리즈D', '시리즈E',
+                    '프리IPO', 'M&A'
+                ];
+
+                const stageSelect = document.getElementById('filter-stage');
+                allStages.forEach(stage => {
+                    const option = document.createElement('option');
+                    option.value = stage;
+                    option.textContent = stage;
+                    stageSelect.appendChild(option);
+                });
+            } catch (err) {
+                console.error('필터 옵션 생성 실패:', err);
+            }
+        }
+
+        // Deal 필터링
+        async function filterDeals() {
+            currentPage = 1;
+            const industryFilter = document.getElementById('filter-industry').value;
+            const stageFilter = document.getElementById('filter-stage').value;
+            const periodFilter = document.getElementById('filter-period').value;
+
+            // 기간 계산
+            const now = new Date();
+            let dateFilter = null;
+            if (periodFilter === '최근 1주') {
+                dateFilter = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            } else if (periodFilter === '최근 1개월') {
+                dateFilter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            } else if (periodFilter === '최근 3개월') {
+                dateFilter = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+            } else if (periodFilter === '최근 1년') {
+                dateFilter = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+            }
+
+            // Supabase 쿼리 생성
+            let query = `${SUPABASE_URL}/rest/v1/deals?select=*&order=news_date.desc,number.desc`;
+
+            if (industryFilter) {
+                query += `&industry_category=eq.${encodeURIComponent(industryFilter)}`;
+            }
+            if (stageFilter) {
+                query += `&stage=ilike.*${stageFilter}*`;
+            }
+            if (dateFilter) {
+                const dateStr = dateFilter.toISOString().split('T')[0];
+                query += `&news_date=gte.${dateStr}`;
+            }
+
+            try {
+                const response = await fetch(query, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+
+                if (response.ok) {
+                    const deals = await response.json();
+                    renderDealsTable(deals);
+                }
+            } catch (err) {
+                console.error('필터링 오류:', err);
+            }
+        }
+
+        // Deal 테이블 렌더링 (No. 컬럼 추가 + 페이지네이션)
+        function renderDealsTable(deals) {
+            const tbody = document.getElementById('deals-tbody');
+            if (!tbody) return;
+
+            // 최초 호출 시에만 currentDeals 갱신 (goToPage에서 재호출 시는 이미 설정됨)
+            if (deals !== currentDeals) {
+                currentDeals = deals;
+            }
+
+            const totalPages = Math.ceil(currentDeals.length / PAGE_SIZE);
+            if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
+            const startIdx = (currentPage - 1) * PAGE_SIZE;
+            const pageDeals = currentDeals.slice(startIdx, startIdx + PAGE_SIZE);
+
+            tbody.innerHTML = pageDeals.map((deal, index) => {
+                const number = startIdx + index + 1;  // 페이지 기반 순서 번호
+                const company = deal.company_name || '-';
+                const industry = deal.industry || '-';
+                let stage = deal.stage || '-';
+                const amount = deal.amount ? `${deal.amount}억원` : '비공개';
+                const investors = deal.investors || '-';
+                const location = deal.location || '-';
+                const newsUrl = deal.news_url || '#';
+                const newsDate = deal.news_date || '-';
+                let siteName = deal.site_name || '-';
+
+                // Google News, 네이버 뉴스, VC 포트폴리오 같은 잘못된 언론사 제거
+                const invalidSites = ['VC 포트폴리오', 'Google News', '네이버 뉴스'];
+                if (invalidSites.includes(siteName)) {
+                    siteName = '-';
+                }
+                const ceo = deal.ceo || '-';
+                const founded = deal.founded || '-';
+                const totalFunding = deal.total_funding ? `${deal.total_funding}억원` : '-';
+
+                // 투자단계 정제 (한글 통일)
+                const validStages = ['프리시드', '시드', '프리A', '프리A 브릿지', '시리즈A', '시리즈B', '시리즈C', '시리즈D', '시리즈E', '프리IPO', 'M&A', '브릿지'];
+                if (stage !== '-' && !validStages.some(v => stage.includes(v))) {
+                    stage = '-';
+                }
+
+                // 투자자 콤마로 구분 (3개까지 표시, 나머지 +N개)
+                let investorList = '-';
+                if (investors !== '-') {
+                    const investorArray = investors.split(',').map(inv => inv.trim());
+                    const wrapInv = inv => `<span style="white-space:nowrap">${escapeHtml(inv)}</span>`;
+                    if (investorArray.length <= 3) {
+                        investorList = investorArray.map(wrapInv).join(', ');
+                    } else {
+                        const first3 = investorArray.slice(0, 3).map(wrapInv).join(', ');
+                        const remaining = investorArray.length - 3;
+                        investorList = `${first3} <span style="color: #6B7280; font-size: 10px; white-space:nowrap;">+${remaining}개</span>`;
+                    }
+                }
+
+                // JSON 데이터를 안전하게 전달하기 위해 escape
+                const investmentReason = deal.investment_reason || '';
+
+                const dealData = JSON.stringify({
+                    company, ceo, founded, totalFunding, industry, location, stage, investors, amount, newsUrl, investmentReason
+                }).replace(/"/g, '&quot;');
+
+                return `
+                    <tr onclick='showDealDetail(${dealData})' style="cursor: pointer;">
+                        <td data-label="No." style="text-align: center; color: var(--text-muted);">${number}</td>
+                        <td data-label="기업명"><div class="deal-name">${escapeHtml(company)}</div></td>
+                        <td data-label="주요사업" class="deal-industry">${escapeHtml(industry)}</td>
+                        <td data-label="투자사유" class="deal-reason">${investmentReason ? escapeHtml(investmentReason) : '-'}</td>
+                        <td data-label="투자단계"><span class="deal-stage ${getStageClass(stage)}">${escapeHtml(stage)}</span></td>
+                        <td data-label="투자자" class="deal-investors">${investorList}</td>
+                        <td data-label="투자금액" class="deal-amount">${escapeHtml(amount)}</td>
+                        <td data-label="뉴스"><a href="${escapeHtml(newsUrl)}" target="_blank" class="link-btn link-news" onclick="event.stopPropagation();">뉴스 보기</a></td>
+                    </tr>
+                `;
+            }).join('');
+
+            renderPagination();
+        }
+
+        // 페이지네이션 UI 렌더링
+        function renderPagination() {
+            const container = document.getElementById('deals-pagination');
+            if (!container) return;
+
+            const totalPages = Math.ceil(currentDeals.length / PAGE_SIZE);
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const startIdx = (currentPage - 1) * PAGE_SIZE + 1;
+            const endIdx = Math.min(currentPage * PAGE_SIZE, currentDeals.length);
+
+            let html = `<div class="pagination-info">${currentDeals.length}건 중 ${startIdx}-${endIdx}건 표시</div>`;
+            html += '<div class="pagination">';
+
+            // 이전 버튼
+            html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&lt; 이전</button>`;
+
+            // 페이지 번호
+            const pages = getPaginationRange(currentPage, totalPages);
+            pages.forEach(p => {
+                if (p === '...') {
+                    html += '<span class="ellipsis">...</span>';
+                } else {
+                    html += `<button class="${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+                }
+            });
+
+            // 다음 버튼
+            html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>다음 &gt;</button>`;
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        // 페이지 범위 계산 (앞뒤 2개 + ... + 처음/마지막)
+        function getPaginationRange(current, total) {
+            if (total <= 7) {
+                return Array.from({length: total}, (_, i) => i + 1);
+            }
+
+            const pages = [];
+            const around = 2; // 현재 페이지 앞뒤 표시 개수
+
+            if (current <= around + 2) {
+                // 앞쪽에 가까울 때
+                for (let i = 1; i <= Math.max(current + around, around + 3); i++) pages.push(i);
+                pages.push('...');
+                pages.push(total);
+            } else if (current >= total - around - 1) {
+                // 뒤쪽에 가까울 때
+                pages.push(1);
+                pages.push('...');
+                for (let i = Math.min(current - around, total - around - 2); i <= total; i++) pages.push(i);
+            } else {
+                // 중간
+                pages.push(1);
+                pages.push('...');
+                for (let i = current - around; i <= current + around; i++) pages.push(i);
+                pages.push('...');
+                pages.push(total);
+            }
+
+            return pages;
+        }
+
+        // 페이지 이동
+        function goToPage(page) {
+            const totalPages = Math.ceil(currentDeals.length / PAGE_SIZE);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderDealsTable(currentDeals);
+
+            // 테이블 상단으로 스크롤
+            const table = document.querySelector('.deals-table');
+            if (table) {
+                table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // 유틸리티 함수들
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = (now - date) / (1000 * 60 * 60);
+
+            if (diff < 1) return '방금 전';
+            if (diff < 24) return Math.floor(diff) + '시간 전';
+            if (diff < 48) return '어제';
+            return date.toLocaleDateString('ko-KR');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;',
+                '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
+        function extractCompanyName(title) {
+            // 따옴표 안의 기업명 추출
+            const match = title.match(/['']([^'']+)['']|"([^"]+)"/);
+            if (match) return match[1] || match[2];
+
+            // 콤마 앞 단어 추출
+            const commaMatch = title.match(/^([^,]+)/);
+            if (commaMatch) {
+                const words = commaMatch[1].split(' ');
+                if (words.length <= 3) return commaMatch[1].trim();
+            }
+            return title.slice(0, 20) + '...';
+        }
+
+        function extractIndustry(title) {
+            const industries = {
+                'AI': 'AI/머신러닝', '인공지능': 'AI/머신러닝',
+                '바이오': '바이오/헬스', '헬스': '바이오/헬스', '의료': '바이오/헬스',
+                '핀테크': '핀테크', '금융': '핀테크', '페이': '핀테크',
+                '이커머스': '이커머스', '커머스': '이커머스', '쇼핑': '이커머스',
+                '게임': '게임/엔터', '엔터': '게임/엔터',
+                'SaaS': 'SaaS/B2B', 'B2B': 'SaaS/B2B', '클라우드': 'SaaS/B2B',
+                '푸드테크': '푸드테크', '식품': '푸드테크',
+                '모빌리티': '모빌리티', '자율주행': '모빌리티',
+                '부동산': '프롭테크', '프롭': '프롭테크',
+                '에듀': '에듀테크', '교육': '에듀테크',
+                '양자': '양자기술', '퀀텀': '양자기술'
+            };
+
+            for (const [key, value] of Object.entries(industries)) {
+                if (title.includes(key)) return value;
+            }
+            return '기타';
+        }
+
+        function extractStage(title) {
+            if (title.includes('시리즈E')) return '시리즈E';
+            if (title.includes('시리즈D')) return '시리즈D';
+            if (title.includes('시리즈C')) return '시리즈C';
+            if (title.includes('시리즈B')) return '시리즈B';
+            if (title.includes('시리즈A')) return '시리즈A';
+            if (title.includes('프리A 브릿지')) return '프리A 브릿지';
+            if (title.includes('프리A')) return '프리A';
+            if (title.includes('프리시드')) return '프리시드';
+            if (title.includes('시드')) return '시드';
+            if (title.includes('프리IPO')) return '프리IPO';
+            if (title.includes('M&A')) return 'M&A';
+            if (title.includes('투자') || title.includes('유치')) return '투자';
+            return '-';
+        }
+
+        function extractAmount(title) {
+            const match = title.match(/(\d+(?:\.\d+)?)\s*(억|조|만)/);
+            if (match) {
+                return match[1] + match[2] + '원';
+            }
+            return '-';
+        }
+
+        function getStageClass(stage) {
+            const classes = {
+                '프리시드': 'stage-seed',
+                '시드': 'stage-seed',
+                '프리A': 'stage-prea',
+                '프리A 브릿지': 'stage-prea',
+                '시리즈A': 'stage-a',
+                '시리즈B': 'stage-b',
+                '시리즈C': 'stage-c',
+                '시리즈D': 'stage-c',
+                '시리즈E': 'stage-c',
+                '프리IPO': 'stage-c',
+                'M&A': 'stage-c',
+                '투자': 'stage-seed'
+            };
+            return classes[stage] || 'stage-seed';
+        }
+
+        // 뉴스 네트워크 로드 (더VC + Top 5)
+        async function loadNewsProviders() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/investment_news_ranking?select=*&order=rank.asc&limit=5`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+
+                if (response.ok) {
+                    const providers = await response.json();
+                    if (providers && providers.length > 0) {
+                        renderNewsProviders(providers);
+                        console.log('뉴스 네트워크 로드 성공:', providers);
+                    }
+                } else {
+                    console.log('뉴스 소스 API 실패, 기본 데이터 사용 (HTML 하드코딩)');
+                }
+            } catch (error) {
+                console.log('뉴스 소스 로드 실패, 기본 데이터 사용:', error);
+            }
+        }
+
+        // 뉴스 네트워크 렌더링 (더VC 1번 + 뉴스 소스 2-6번)
+        function renderNewsProviders(providers) {
+            const container = document.getElementById('news-provider-list');
+            if (!container) return;
+
+            // 더VC를 1번으로 추가
+            let html = `
+                <a href="https://thevc.kr" target="_blank" class="news-provider-item">
+                    <span class="provider-number">1</span>
+                    <span class="provider-name">더VC</span>
+                </a>
+            `;
+
+            // 나머지 5개 뉴스 소스를 2-6번으로 추가
+            const top5 = providers.slice(0, 5);
+            html += top5.map((provider, index) => `
+                <a href="${escapeHtml(provider.site_url)}" target="_blank" class="news-provider-item">
+                    <span class="provider-number">${index + 2}</span>
+                    <span class="provider-name">${escapeHtml(provider.site_name)}</span>
+                </a>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        // 투자 통계 로드 (어제, 지난주, 금년)
+        async function loadInvestmentStats() {
+            try {
+                // Deal 테이블에서 투자유치 기업 수 계산 (news_date 기준)
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/deals?select=news_date`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+
+                if (response.ok) {
+                    const deals = await response.json();
+
+                    // 날짜 계산
+                    const today = new Date();
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const weekAgo = new Date(today);
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+
+                    // 날짜 형식 (YYYY-MM-DD)
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+                    const weekAgoStr = weekAgo.toISOString().split('T')[0];
+                    const todayStr = today.toISOString().split('T')[0];
+
+                    // 투자유치 기업 수 집계
+                    let yesterdayCount = 0;
+                    let lastWeekCount = 0;
+                    let yearCount = 0;
+
+                    deals.forEach(deal => {
+                        const dealDate = deal.news_date;
+                        if (!dealDate) return;
+
+                        // 어제
+                        if (dealDate === yesterdayStr) {
+                            yesterdayCount++;
+                        }
+
+                        // 지난주 (7일 전 ~ 어제)
+                        if (dealDate >= weekAgoStr && dealDate < todayStr) {
+                            lastWeekCount++;
+                        }
+
+                        // 금년 누적
+                        if (dealDate >= '2026-01-01') {
+                            yearCount++;
+                        }
+                    });
+
+                    // HTML 업데이트
+                    document.getElementById('stat-yesterday').textContent = yesterdayCount;
+                    document.getElementById('stat-last-week').textContent = lastWeekCount;
+                    document.getElementById('stat-year-total').textContent = yearCount;
+
+                    console.log('투자 통계 로드 성공:', { yesterdayCount, lastWeekCount, yearCount });
+                } else {
+                    console.log('통계 로드 실패, 기본값 유지');
+                }
+            } catch (error) {
+                console.log('통계 로드 오류:', error);
+            }
+        }
+
+        // 뉴스 모달 열기/닫기
+        function openNewsModal() {
+            document.getElementById('newsModal').style.display = 'flex';
+            loadAllNews();  // 전체 뉴스 로드
+        }
+
+        function closeNewsModal() {
+            document.getElementById('newsModal').style.display = 'none';
+        }
+
+        // 기업 상세 정보 모달 열기/닫기
+        function showDealDetail(dealData) {
+            const data = typeof dealData === 'string' ? JSON.parse(dealData) : dealData;
+
+            document.getElementById('detail-company-name').textContent = data.company || '-';
+            document.getElementById('detail-company').textContent = data.company || '-';
+            document.getElementById('detail-ceo').textContent = data.ceo || '-';
+            document.getElementById('detail-founded').textContent = data.founded || '-';
+            document.getElementById('detail-industry').textContent = data.industry || '-';
+            document.getElementById('detail-location').textContent = data.location || '-';
+            document.getElementById('detail-stage').textContent = data.stage || '-';
+            document.getElementById('detail-investors').textContent = data.investors || '-';
+            document.getElementById('detail-amount').textContent = data.amount || '-';
+            document.getElementById('detail-total-funding').textContent = data.totalFunding || '-';
+
+            const reasonEl = document.getElementById('detail-investment-reason');
+            const reasonRow = document.getElementById('detail-reason-row');
+            if (data.investmentReason) {
+                reasonEl.textContent = data.investmentReason;
+                reasonRow.style.display = '';
+            } else {
+                reasonRow.style.display = 'none';
+            }
+
+            const newsLink = document.getElementById('detail-news-link');
+            if (data.newsUrl && data.newsUrl !== '#') {
+                newsLink.href = data.newsUrl;
+                newsLink.style.display = 'inline';
+            } else {
+                newsLink.style.display = 'none';
+            }
+
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+
+        function closeDealDetail() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const newsModal = document.getElementById('newsModal');
+            const detailModal = document.getElementById('detailModal');
+
+            if (event.target === newsModal) {
+                closeNewsModal();
+            }
+            if (event.target === detailModal) {
+                closeDealDetail();
+            }
+        }
+
+        // 전체 뉴스 로드 (최근 1주일)
+        async function loadAllNews() {
+            try {
+                // 1주일 전 날짜 계산
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                const weekAgoStr = oneWeekAgo.toISOString().split('T')[0];
+
+                // Deal 테이블에서 일주일간 데이터 가져오기 (news_date 기준)
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/deals?select=company_name,stage,amount,news_title,news_url,site_name,news_date,created_at&news_date=gte.${weekAgoStr}&news_title=not.is.null&order=news_date.desc`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+
+                if (response.ok) {
+                    const deals = await response.json();
+                    console.log('일주일간 Deal:', deals.length, '개');
+                    renderModalNews(deals);
+                } else {
+                    console.error('뉴스 로드 실패');
+                }
+            } catch (error) {
+                console.error('뉴스 로드 오류:', error);
+            }
+        }
+
+        // 모달에 뉴스 렌더링 (Deal 테이블 기반)
+        function renderModalNews(deals) {
+            const container = document.getElementById('modal-news-list');
+            if (!deals || deals.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #6B7280;">일주일간 투자유치 뉴스가 없습니다.</p>';
+                return;
+            }
+
+            container.innerHTML = deals.map(deal => {
+                const datetime = formatDateTime(deal.news_date, deal.created_at);
+                const source = deal.site_name || '미디어';
+                const title = deal.news_title || '제목 없음';
+                const url = deal.news_url || '#';
+                const company = deal.company_name || '-';
+                const stage = deal.stage || '-';
+                const amount = deal.amount ? `${deal.amount}억원` : '비공개';
+
+                return `
+                    <div class="modal-news-item" style="padding: 20px; border-bottom: 1px solid #F3F4F6;">
+                        <!-- 1행: 소스 + 연월일시 -->
+                        <div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center; font-size: 13px;">
+                            <span style="font-weight: 400; color: var(--amber-dark); background: var(--amber-pale); padding: 4px 10px; border-radius: 6px;">[${escapeHtml(source)}]</span>
+                            <span style="color: var(--text-muted); font-size: 13px;">${datetime}</span>
+                        </div>
+
+                        <!-- 2행: 제목 -->
+                        <h3 class="modal-news-title" style="margin-bottom: 12px;">
+                            <a href="${escapeHtml(url)}" target="_blank" style="color: var(--text-primary); text-decoration: none; font-size: 16px; font-weight: 400; line-height: 1.5;">
+                                ${escapeHtml(title)}
+                            </a>
+                        </h3>
+
+                        <!-- 3행: 회사명 | 투자단계 | 금액 -->
+                        <div style="display: flex; align-items: center; gap: 8px; padding-top: 12px; border-top: 1px solid #F9FAFB; font-size: 14px; color: var(--text-secondary);">
+                            <span style="font-weight: 400; color: var(--text-primary);">${escapeHtml(company)}</span>
+                            <span style="color: #D1D5DB; font-weight: 300;">|</span>
+                            <span style="color: var(--deep-green);">${escapeHtml(stage)}</span>
+                            <span style="color: #D1D5DB; font-weight: 300;">|</span>
+                            <span style="color: ${amount === '비공개' ? 'var(--text-muted)' : 'var(--amber-dark)'}; font-weight: 400; ${amount === '비공개' ? 'font-style: italic;' : ''}">${escapeHtml(amount)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== 뉴스레터 구독 기능 =====
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        function openSubscribeModal() {
+            document.getElementById('subscribe-modal').style.display = 'flex';
+        }
+
+        function closeSubscribeModal() {
+            document.getElementById('subscribe-modal').style.display = 'none';
+        }
+
+        // 모달 바깥 클릭 시 닫기
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('subscribe-modal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) closeSubscribeModal();
+                });
+            }
+        });
+
+        async function submitSubscribe(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.textContent = '처리 중...';
+
+            const email = document.getElementById('subscribe-email').value;
+            const name = document.getElementById('subscribe-name').value || null;
+            const company = document.getElementById('subscribe-company').value || null;
+            const daily = document.getElementById('sub-daily').checked;
+            const weekly = document.getElementById('sub-weekly').checked;
+
+            let subscriptionType = 'none';
+            if (daily && weekly) subscriptionType = 'both';
+            else if (daily) subscriptionType = 'daily';
+            else if (weekly) subscriptionType = 'weekly';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('newsletter_subscribers')
+                    .insert({
+                        email: email,
+                        name: name,
+                        company: company,
+                        subscription_type: subscriptionType,
+                        is_active: true,
+                        subscribed_at: new Date().toISOString()
+                    });
+
+                if (error) {
+                    if (error.code === '23505') {
+                        alert('이미 구독 중인 이메일입니다.');
+                    } else {
+                        throw error;
+                    }
+                } else {
+                    alert('구독이 완료되었습니다!');
+                    closeSubscribeModal();
+                    document.getElementById('subscribe-form').reset();
+                }
+            } catch (err) {
+                console.error('구독 오류:', err);
+                alert('구독 중 오류가 발생했습니다. 다시 시도해주세요.');
+            }
+
+            btn.disabled = false;
+            btn.textContent = '구독하기';
+        }
+    </script>
+
+    <!-- 뉴스 모달 -->
+    <div id="newsModal" class="news-modal">
+        <div class="news-modal-content">
+            <div class="news-modal-header">
+                <h2>일주일간 투자유치 뉴스</h2>
+                <button class="news-modal-close" onclick="closeNewsModal()">&times;</button>
+            </div>
+            <div class="news-modal-body" id="modal-news-list">
+                <!-- 뉴스 목록이 JavaScript로 로드됩니다 -->
+                <p style="text-align: center; padding: 40px; color: #6B7280;">로딩 중...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 기업 상세 정보 모달 -->
+    <div id="detailModal" class="detail-modal">
+        <div class="detail-modal-content">
+            <div class="detail-modal-header">
+                <h2 id="detail-company-name">기업 상세 정보</h2>
+                <button class="detail-modal-close" onclick="closeDealDetail()">&times;</button>
+            </div>
+            <div class="detail-modal-body">
+                <div class="detail-row">
+                    <div class="detail-label">기업명</div>
+                    <div class="detail-value" id="detail-company"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">대표자</div>
+                    <div class="detail-value" id="detail-ceo"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">설립일</div>
+                    <div class="detail-value" id="detail-founded"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">업종</div>
+                    <div class="detail-value" id="detail-industry"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">지역</div>
+                    <div class="detail-value" id="detail-location"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">투자단계</div>
+                    <div class="detail-value" id="detail-stage"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">투자자</div>
+                    <div class="detail-value" id="detail-investors"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">투자금액</div>
+                    <div class="detail-value" id="detail-amount"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">누적투자액</div>
+                    <div class="detail-value" id="detail-total-funding"></div>
+                </div>
+                <div class="detail-row" id="detail-reason-row">
+                    <div class="detail-label">투자사유</div>
+                    <div class="detail-value" id="detail-investment-reason"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">뉴스</div>
+                    <div class="detail-value"><a id="detail-news-link" href="#" target="_blank">원문 보기</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 구독 모달 -->
+    <div class="subscribe-modal" id="subscribe-modal">
+        <div class="subscribe-modal-content">
+            <button class="modal-close" onclick="closeSubscribeModal()">✕ 닫기</button>
+            <h3>투자 뉴스레터 구독</h3>
+            <p>최신 스타트업 투자유치 소식을 이메일로 받아보세요.</p>
+
+            <form class="subscribe-form" id="subscribe-form" onsubmit="submitSubscribe(event)">
+                <div class="form-group">
+                    <label>이메일 <span class="required">*</span></label>
+                    <input type="email" id="subscribe-email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>이름 (선택)</label>
+                    <input type="text" id="subscribe-name" placeholder="홍길동">
+                </div>
+                <div class="form-group">
+                    <label>회사명 (선택)</label>
+                    <input type="text" id="subscribe-company" placeholder="회사명">
+                </div>
+                <div class="form-group">
+                    <label>구독 유형</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="sub-daily" checked> 일간 뉴스
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="sub-weekly"> 주간 리포트
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit-subscribe" id="btn-submit">
+                    구독하기
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 투자단계 가이드 모달 -->
+    <div id="stageGuideModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:#fff; border-radius:16px; max-width:560px; width:90%; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <!-- 헤더 -->
+            <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed); padding:24px 28px; border-radius:16px 16px 0 0; display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; color:#fff; font-size:18px; font-weight:700;">투자단계 가이드</h2>
+                <span onclick="document.getElementById('stageGuideModal').style.display='none'" style="color:#fff; font-size:24px; cursor:pointer; line-height:1;">&times;</span>
+            </div>
+            <!-- 흐름도 -->
+            <div style="padding:20px 28px 8px; text-align:center;">
+                <p style="margin:0; font-size:13px; color:#6b7280; line-height:2;">
+                    <span style="display:inline-block; background:#ede9fe; color:#7c3aed; padding:3px 10px; border-radius:12px; font-weight:600; margin:2px;">프리시드</span>
+                    <span style="color:#d1d5db;">→</span>
+                    <span style="display:inline-block; background:#ede9fe; color:#7c3aed; padding:3px 10px; border-radius:12px; font-weight:600; margin:2px;">시드</span>
+                    <span style="color:#d1d5db;">→</span>
+                    <span style="display:inline-block; background:#e0e7ff; color:#4f46e5; padding:3px 10px; border-radius:12px; font-weight:600; margin:2px;">프리A</span>
+                    <span style="color:#d1d5db;">→</span>
+                    <span style="display:inline-block; background:#dbeafe; color:#2563eb; padding:3px 10px; border-radius:12px; font-weight:600; margin:2px;">시리즈A</span>
+                    <span style="color:#d1d5db;">→</span>
+                    <span style="display:inline-block; background:#d1fae5; color:#059669; padding:3px 10px; border-radius:12px; font-weight:600; margin:2px;">B</span>
+                    <span style="color:#d1d5db;">→</span>
+                    <span style="display:inline-block; background:#fef3c7; color:#d97706; padding:3px 10px; border-radius:12px; font-weight:600; margin:2px;">C</span>
+                    <span style="color:#d1d5db;">→</span>
+                    <span style="display:inline-block; background:#fee2e2; color:#dc2626; padding:3px 10px; border-radius:12px; font-weight:600; margin:2px;">D·E</span>
+                    <span style="color:#d1d5db;">→</span>
+                    <span style="display:inline-block; background:#f3f4f6; color:#374151; padding:3px 10px; border-radius:12px; font-weight:600; margin:2px;">프리IPO</span>
+                </p>
+            </div>
+            <!-- 단계별 설명 -->
+            <div style="padding:12px 28px 24px;">
+                <table style="width:100%; border-collapse:collapse; font-size:14px;">
+                    <tr style="background:#f9fafb;">
+                        <td style="padding:12px 14px; font-weight:700; color:#7c3aed; white-space:nowrap; border-bottom:1px solid #f3f4f6; width:110px;">프리시드</td>
+                        <td style="padding:12px 14px; color:#374151; border-bottom:1px solid #f3f4f6; line-height:1.5;">아이디어 단계. 팀 구성, 프로토타입 제작</td>
+                        <td style="padding:12px 14px; color:#9ca3af; border-bottom:1px solid #f3f4f6; white-space:nowrap; text-align:right;">~5억</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px 14px; font-weight:700; color:#7c3aed; border-bottom:1px solid #f3f4f6;">시드</td>
+                        <td style="padding:12px 14px; color:#374151; border-bottom:1px solid #f3f4f6; line-height:1.5;">MVP 완성, 초기 고객 확보 시작</td>
+                        <td style="padding:12px 14px; color:#9ca3af; border-bottom:1px solid #f3f4f6; text-align:right;">3~15억</td>
+                    </tr>
+                    <tr style="background:#f9fafb;">
+                        <td style="padding:12px 14px; font-weight:700; color:#4f46e5; border-bottom:1px solid #f3f4f6;">프리A</td>
+                        <td style="padding:12px 14px; color:#374151; border-bottom:1px solid #f3f4f6; line-height:1.5;">제품 출시됐지만 매출 본격화 전</td>
+                        <td style="padding:12px 14px; color:#9ca3af; border-bottom:1px solid #f3f4f6; text-align:right;">10~30억</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px 14px; font-weight:700; color:#4f46e5; border-bottom:1px solid #f3f4f6;">프리A 브릿지</td>
+                        <td style="padding:12px 14px; color:#374151; border-bottom:1px solid #f3f4f6; line-height:1.5;">시리즈A 직전, 운영자금 확보를 위한 연결 투자</td>
+                        <td style="padding:12px 14px; color:#9ca3af; border-bottom:1px solid #f3f4f6; text-align:right;">10~30억</td>
+                    </tr>
+                    <tr style="background:#f9fafb;">
+                        <td style="padding:12px 14px; font-weight:700; color:#2563eb; border-bottom:1px solid #f3f4f6;">시리즈A</td>
+                        <td style="padding:12px 14px; color:#374151; border-bottom:1px solid #f3f4f6; line-height:1.5;">비즈니스 모델 검증 완료, 본격 성장 시작</td>
+                        <td style="padding:12px 14px; color:#9ca3af; border-bottom:1px solid #f3f4f6; text-align:right;">30~100억</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px 14px; font-weight:700; color:#059669; border-bottom:1px solid #f3f4f6;">시리즈B</td>
+                        <td style="padding:12px 14px; color:#374151; border-bottom:1px solid #f3f4f6; line-height:1.5;">매출 성장 가속화, 조직 확대</td>
+                        <td style="padding:12px 14px; color:#9ca3af; border-bottom:1px solid #f3f4f6; text-align:right;">100~300억</td>
+                    </tr>
+                    <tr style="background:#f9fafb;">
+                        <td style="padding:12px 14px; font-weight:700; color:#d97706; border-bottom:1px solid #f3f4f6;">시리즈C</td>
+                        <td style="padding:12px 14px; color:#374151; border-bottom:1px solid #f3f4f6; line-height:1.5;">시장 지배력 확보, 해외 진출</td>
+                        <td style="padding:12px 14px; color:#9ca3af; border-bottom:1px solid #f3f4f6; text-align:right;">300~1000억</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px 14px; font-weight:700; color:#dc2626; border-bottom:1px solid #f3f4f6;">시리즈D·E</td>
+                        <td style="padding:12px 14px; color:#374151; border-bottom:1px solid #f3f4f6; line-height:1.5;">IPO 준비 단계의 대규모 투자</td>
+                        <td style="padding:12px 14px; color:#9ca3af; border-bottom:1px solid #f3f4f6; text-align:right;">500억~</td>
+                    </tr>
+                    <tr style="background:#f9fafb;">
+                        <td style="padding:12px 14px; font-weight:700; color:#374151; border-bottom:1px solid #f3f4f6;">프리IPO</td>
+                        <td style="padding:12px 14px; color:#374151; border-bottom:1px solid #f3f4f6; line-height:1.5;">상장 직전 마지막 투자</td>
+                        <td style="padding:12px 14px; color:#9ca3af; border-bottom:1px solid #f3f4f6; text-align:right;">수백~수천억</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px 14px; font-weight:700; color:#374151;">M&A</td>
+                        <td style="padding:12px 14px; color:#374151; line-height:1.5;">인수합병</td>
+                        <td style="padding:12px 14px; color:#9ca3af; text-align:right;">규모 다양</td>
+                    </tr>
+                </table>
+                <p style="margin:16px 0 0; padding:12px 16px; background:#f8f7ff; border-radius:8px; font-size:13px; color:#6b7280; line-height:1.6;">
+                    <b style="color:#4f46e5;">브릿지(Bridge)</b>란? 다음 라운드까지 자금이 부족할 때 받는 중간 투자입니다. "프리A 브릿지"는 시리즈A를 받기 직전에 운영자금이 떨어져서 급하게 받는 소규모 투자입니다.
+                </p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

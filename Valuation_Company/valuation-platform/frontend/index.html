@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValueLink - 기업가치평가 플랫폼</title>
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="app/styles/mobile-optimize.css">
+    <style>
+        :root {
+            --deep-blue: #1D4ED8;
+            --deep-green: #166534;
+            --amber: #F59E0B;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --white: #FFFFFF;
+            --border: #E5E7EB;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #F9FAFB;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero {
+            flex: 1;
+        }
+
+        /* Header placeholder */
+        #header-container {
+            min-height: 90px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1D4ED8 0%, #166534 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 40px 120px 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .hero-content {
+            max-width: 900px;
+        }
+
+        .hero-logo {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .hero-description {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 60px;
+        }
+
+        /* Service Cards */
+        .services {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 20px;
+            padding: 48px 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .service-card.valuation {
+            border-top: 4px solid var(--deep-blue);
+        }
+
+        .service-card.valuation:hover {
+            box-shadow: 0 12px 32px rgba(29, 78, 216, 0.3);
+        }
+
+        .service-card.link {
+            border-top: 4px solid var(--deep-green);
+        }
+
+        .service-card.link:hover {
+            box-shadow: 0 12px 32px rgba(22, 101, 52, 0.3);
+        }
+
+        .service-card.deal {
+            border-top: 4px solid var(--amber);
+        }
+
+        .service-card.deal:hover {
+            box-shadow: 0 12px 32px rgba(245, 158, 11, 0.3);
+        }
+
+        .service-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+        }
+
+        .service-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .service-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .service-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #1E3A5F;
+            color: var(--white);
+            padding: 32px 40px;
+            margin-top: 0;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo { font-size: 18px; font-weight: 700; }
+        .footer-text { font-size: 13px; opacity: 0.7; }
+        .footer-admin-link {
+            font-size: 10px;
+            opacity: 0.3;
+            margin-left: 16px;
+            color: var(--white);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .footer-admin-link:hover {
+            opacity: 0.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .services {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .hero-logo {
+                font-size: 36px;
+            }
+
+            .hero-description {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Hero Section */
+            .hero {
+                padding: 24px 20px 32px 20px;
+            }
+
+            .hero-logo {
+                font-size: 28px;
+                margin-bottom: 12px;
+            }
+
+            .hero-description {
+                font-size: 13px;
+            }
+
+            /* Service Cards */
+            .services {
+                gap: 16px;
+            }
+
+            .service-card {
+                padding: 32px 24px;
+            }
+
+            .service-icon {
+                font-size: 48px;
+                margin-bottom: 16px;
+            }
+
+            .service-title {
+                font-size: 22px;
+                margin-bottom: 8px;
+            }
+
+            .service-subtitle {
+                font-size: 14px;
+                margin-bottom: 16px;
+            }
+
+            .service-description {
+                font-size: 13px;
+            }
+
+            /* Footer */
+            footer {
+                padding: 24px 20px;
+                margin-top: 40px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .footer-logo {
+                font-size: 16px;
+            }
+
+            .footer-text {
+                font-size: 12px;
+            }
+
+            .footer-admin-link {
+                display: block;
+                margin-left: 0;
+                margin-top: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div id="header-container"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-logo">ValueLink</h1>
+            <p class="hero-description">
+                AI 기반 기업가치 평가부터 투자자·파트너·서포터 연결까지 기업의 성장을 지원합니다
+            </p>
+
+            <!-- Service Cards -->
+            <div class="services">
+                <!-- Valuation -->
+                <a href="app/valuation.html" class="service-card valuation">
+                    <div class="service-icon">📊</div>
+                    <h2 class="service-title">Valuation</h2>
+                    <p class="service-subtitle">기업가치 평가</p>
+                    <p class="service-description">
+                        DCF 등 5가지 평가방법을 적용해서<br>
+                        AI를 활용하여 빠르고 낮은 비용으로<br>
+                        기업의 가치를 평가합니다
+                    </p>
+                </a>
+
+                <!-- Link -->
+                <a href="app/link.html" class="service-card link">
+                    <div class="service-icon">🔗</div>
+                    <h2 class="service-title">Link</h2>
+                    <p class="service-subtitle">투자자·파트너·서포터 연결</p>
+                    <p class="service-description">
+                        기업가치 평가를 받은 기업에게<br>
+                        투자자, 비즈니스 파트너, 서포터를<br>
+                        발굴하여 연결시킵니다
+                    </p>
+                </a>
+
+                <!-- Deals -->
+                <a href="app/deal.html" class="service-card deal">
+                    <div class="service-icon">📰</div>
+                    <h2 class="service-title">Deals</h2>
+                    <p class="service-subtitle">투자유치 정보 제공</p>
+                    <p class="service-description">
+                        투자유치 뉴스를 추적하여<br>
+                        투자받은 기업의 현황 및 IR 정보를<br>
+                        함께 제공합니다
+                    </p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">ValueLink</div>
+            <div class="footer-text">
+                © 2026 ValueLink. All rights reserved.
+                <a href="app/core/mypage-admin.html" class="footer-admin-link">Admin</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 헤더 로드
+        fetch('components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                const container = document.getElementById('header-container');
+                container.innerHTML = data;
+
+                // 삽입된 script 태그를 수동으로 실행
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+    </script>
+</body>
+</html>

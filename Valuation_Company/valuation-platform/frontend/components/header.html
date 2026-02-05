@@ -1,0 +1,697 @@
+<!-- 공통 헤더 컴포넌트 -->
+<style>
+    :root {
+        --deep-blue: #1D4ED8;
+        --deep-green: #166534;
+        --amber: #F59E0B;
+        --text-primary: #111827;
+        --text-secondary: #6B7280;
+        --white: #FFFFFF;
+        --border: #E5E7EB;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #F9FAFB;
+    }
+
+    .main-header {
+        background: var(--white);
+        border-bottom: 1px solid var(--border);
+        padding: 0 40px;
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+    }
+
+    /* 로고 */
+    .logo-container {
+        text-decoration: none;
+        display: block;
+    }
+
+    .logo-svg {
+        height: 75px;
+        width: auto;
+    }
+
+    /* 메인 메뉴 */
+    .main-menu {
+        display: flex;
+        gap: 8px;
+    }
+
+    .menu-item {
+        padding: 12px 24px;
+        font-size: 19px;
+        font-weight: 600;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    /* Valuation 메뉴 - 파란색 (시스템) */
+    #menu-valuation {
+        color: var(--deep-blue);
+    }
+
+    #menu-valuation.active {
+        color: var(--deep-blue);
+        font-weight: 700;
+        background: #DBEAFE;
+    }
+
+    #menu-valuation:hover {
+        background: #EFF6FF;
+    }
+
+    /* Link 메뉴 - 초록색 (기업을 위한 연결) 👑 */
+    #menu-link {
+        color: var(--deep-green);
+    }
+
+    #menu-link.active {
+        color: var(--deep-green);
+        font-weight: 700;
+        background: #D1FAE5;
+    }
+
+    #menu-link:hover {
+        background: #ECFDF5;
+    }
+
+    /* Deals 메뉴 - 주황색 (투자 정보) */
+    #menu-deal {
+        color: var(--amber);
+    }
+
+    #menu-deal.active {
+        color: var(--amber);
+        font-weight: 700;
+        background: #FEF3C7;
+    }
+
+    #menu-deal:hover {
+        background: #FFFBEB;
+    }
+
+    /* My Page 메뉴 - 검정색 (고객 활동) */
+    #menu-mypage {
+        color: var(--text-primary);
+        margin-left: 16px;
+    }
+
+    #menu-mypage.active {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    #menu-mypage:hover {
+        opacity: 0.7;
+    }
+
+    /* 알람 */
+    .notification-btn {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease;
+    }
+
+    .notification-btn:hover {
+        background: #F3F4F6;
+    }
+
+    .notification-icon {
+        font-size: 24px;
+        color: var(--text-secondary);
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 18px;
+        height: 18px;
+        background: #EF4444;
+        border-radius: 50%;
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid white;
+    }
+
+    /* 오른쪽 영역 */
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* 로그인/회원가입 버튼 */
+    .btn-login {
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-login:hover {
+        border-color: var(--deep-blue);
+        color: var(--deep-blue);
+        background: #F0F9FF;
+    }
+
+    /* 회원가입 버튼 - 파란색 (시스템/플랫폼) */
+    .btn-signup {
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: white;
+        background: var(--deep-blue);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-signup:hover {
+        background: #1E40AF;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+    }
+
+    /* 로그인 상태 - 사용자 프로필 영역 */
+    .user-profile-area {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--deep-blue);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.3;
+    }
+
+    .user-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .user-role-badge {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--deep-blue);
+    }
+
+    .btn-logout {
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-logout:hover {
+        border-color: #EF4444;
+        color: #EF4444;
+        background: #FEF2F2;
+    }
+
+    /* 햄버거 메뉴 버튼 (모바일 전용) */
+    .mobile-menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        z-index: 1010;
+        flex-shrink: 0;
+    }
+
+    .mobile-menu-toggle span {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: #1E3A5F;
+        margin: 6px 0;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-menu-toggle.active span:nth-child(1) {
+        transform: rotate(45deg) translate(6px, 6px);
+    }
+
+    .mobile-menu-toggle.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .mobile-menu-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px);
+    }
+
+    /* 모바일 오버레이 */
+    .mobile-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.3);
+        z-index: 999;
+    }
+
+    .mobile-overlay.show {
+        display: block;
+    }
+
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 768px) {
+        .main-header {
+            padding: 0 16px;
+            height: 60px;
+            flex-wrap: nowrap;
+            gap: 0;
+        }
+
+        .header-left {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .logo-svg {
+            height: 36px;
+        }
+
+        .mobile-menu-toggle {
+            display: block;
+        }
+
+        /* 오른쪽 영역: 모바일에서 드롭다운 메뉴로 변환 */
+        .header-right {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: white;
+            flex-direction: column;
+            padding: 0;
+            gap: 0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            border-bottom: 1px solid #E5E7EB;
+            display: none;
+            z-index: 1000;
+            max-height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+
+        .header-right.show {
+            display: flex;
+        }
+
+        /* 메인 메뉴 - 세로 배치 */
+        .main-menu {
+            flex-direction: column;
+            gap: 0;
+            width: 100%;
+            padding: 8px 0;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .menu-item {
+            padding: 16px 24px;
+            font-size: 16px;
+            border-radius: 0;
+            border-bottom: none;
+        }
+
+        .menu-item:hover {
+            background: #F3F4F6;
+        }
+
+        .menu-item.active {
+            background: #EFF6FF;
+        }
+
+        #menu-mypage {
+            margin-left: 0;
+        }
+
+        /* 알림 버튼 */
+        .notification-btn {
+            display: none;
+        }
+
+        /* 로그인/회원가입 버튼 영역 */
+        .btn-login, .btn-signup {
+            width: calc(100% - 48px);
+            margin: 0 24px;
+            padding: 14px 20px;
+            font-size: 15px;
+            text-align: center;
+        }
+
+        .btn-login {
+            margin-top: 12px;
+        }
+
+        .btn-signup {
+            margin-top: 8px;
+            margin-bottom: 16px;
+        }
+
+        /* 로그인 상태 - 모바일 */
+        .user-profile-area {
+            width: calc(100% - 48px);
+            margin: 12px 24px 16px;
+            padding: 12px 0;
+        }
+
+        .btn-logout {
+            width: calc(100% - 48px);
+            margin: 0 24px 16px;
+            padding: 14px 20px;
+            font-size: 15px;
+            text-align: center;
+        }
+    }
+
+    /* Tablet (769px ~ 1024px) */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .main-header {
+            padding: 0 24px;
+        }
+
+        .logo-svg {
+            height: 55px;
+        }
+
+        .menu-item {
+            padding: 10px 16px;
+            font-size: 15px;
+        }
+
+        .btn-login, .btn-signup {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+    }
+</style>
+
+<!-- 모바일 오버레이 -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+<header class="main-header">
+    <div class="header-left">
+        <!-- 로고 -->
+        <a href="index.html" class="logo-container">
+            <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 100">
+                <!-- 배경 -->
+                <rect width="500" height="100" fill="#FFFFFF"/>
+
+                <!-- V + L 심볼 (높이 40px, 균형 조정) -->
+                <g transform="translate(50, 30)">
+                    <!-- 선1: 평가 - 딥블루 (왼쪽) -->
+                    <line x1="0" y1="0" x2="28" y2="40" stroke="#1D4ED8" stroke-width="12" stroke-linecap="round"/>
+
+                    <!-- 선2: 기업 - 딥그린 (가운데) 👑 -->
+                    <line x1="56" y1="0" x2="28" y2="40" stroke="#166534" stroke-width="12" stroke-linecap="round"/>
+
+                    <!-- 선3: 연결 - 앰버 (아래) -->
+                    <line x1="28" y1="40" x2="84" y2="40" stroke="#F59E0B" stroke-width="12" stroke-linecap="round"/>
+                </g>
+
+                <!-- 텍스트: ValueLink (세로 중앙 정렬) -->
+                <text x="155" y="50" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#1E3A5F" dominant-baseline="middle">ValueLink</text>
+            </svg>
+        </a>
+    </div>
+
+    <!-- 햄버거 메뉴 버튼 (모바일) -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="toggleHeaderMenu()">
+        <span></span><span></span><span></span>
+    </button>
+
+    <div class="header-right" id="headerRight">
+        <!-- 메인 메뉴 -->
+        <nav class="main-menu">
+            <a href="index.html" class="menu-item active" id="menu-valuation">
+                Valuation
+            </a>
+            <a href="app/link.html" class="menu-item" id="menu-link">
+                Link
+            </a>
+            <a href="app/deal.html" class="menu-item" id="menu-deal">
+                Deals
+            </a>
+            <a href="app/core/mypage.html" class="menu-item" id="menu-mypage">
+                My Page
+            </a>
+        </nav>
+
+        <!-- 알람 -->
+        <button class="notification-btn" onclick="toggleNotifications()">
+            <span class="notification-icon">🔔</span>
+            <span class="notification-badge">3</span>
+        </button>
+
+        <!-- 로그인/회원가입 또는 사용자 프로필 (JS에서 동적 전환) -->
+        <div id="auth-buttons">
+            <button class="btn-login" id="btnLogin">로그인</button>
+            <button class="btn-signup" id="btnSignup">회원가입</button>
+        </div>
+        <div id="user-logged-in" style="display:none;">
+            <div class="user-profile-area">
+                <div class="user-avatar" id="userAvatarText">선</div>
+                <div class="user-info">
+                    <span class="user-name" id="userNameDisplay">선웅규</span>
+                    <span class="user-role-badge" id="userRoleBadge">관리자</span>
+                </div>
+            </div>
+            <button class="btn-logout" id="btnLogout">로그아웃</button>
+        </div>
+    </div>
+</header>
+
+<script>
+// 현재 페이지에 따라 경로 및 active 메뉴 설정 (즉시 실행)
+(function() {
+    const currentPath = window.location.pathname;
+
+    // /app/ 폴더 기준으로 깊이 계산
+    const appIndex = currentPath.indexOf('/app/');
+    let basePath = '';
+
+    if (appIndex !== -1) {
+        // /app/ 이후의 경로에서 폴더 깊이 계산
+        const afterApp = currentPath.substring(appIndex + 5); // '/app/' 이후
+        const depth = (afterApp.match(/\//g) || []).length; // 슬래시 개수 = 하위 폴더 깊이
+
+        // 깊이만큼 '../' 추가
+        basePath = '../'.repeat(depth);
+    } else {
+        // /app/ 폴더 밖 (예: index.html)
+        basePath = 'app/';
+    }
+
+    // 로고 링크 업데이트 (항상 루트의 index.html로)
+    const logoLink = document.querySelector('.logo-container');
+    if (logoLink) {
+        if (appIndex !== -1) {
+            const afterApp = currentPath.substring(appIndex + 5);
+            const depth = (afterApp.match(/\//g) || []).length;
+            logoLink.href = '../'.repeat(depth + 1) + 'index.html';
+        } else {
+            logoLink.href = 'index.html';
+        }
+    }
+
+    // 메뉴 링크 업데이트
+    const menuValuation = document.getElementById('menu-valuation');
+    const menuLink = document.getElementById('menu-link');
+    const menuDeal = document.getElementById('menu-deal');
+    const menuMypage = document.getElementById('menu-mypage');
+
+    if (menuValuation) menuValuation.href = basePath + 'valuation.html';
+    if (menuLink) menuLink.href = basePath + 'link.html';
+    if (menuDeal) menuDeal.href = basePath + 'deal.html';
+    if (menuMypage) menuMypage.href = basePath + 'core/mypage-company.html';
+
+    // 모든 메뉴 active 제거
+    if (menuValuation) menuValuation.classList.remove('active');
+    if (menuLink) menuLink.classList.remove('active');
+    if (menuDeal) menuDeal.classList.remove('active');
+    if (menuMypage) menuMypage.classList.remove('active');
+
+    // 현재 페이지에 따라 active 추가
+    if (currentPath.includes('link') || currentPath.includes('inquiry')) {
+        if (menuLink) menuLink.classList.add('active');
+    } else if (currentPath.includes('deal')) {
+        if (menuDeal) menuDeal.classList.add('active');
+    } else if (currentPath.includes('mypage')) {
+        if (menuMypage) menuMypage.classList.add('active');
+    } else if (currentPath.includes('valuation') || currentPath.includes('guide') || currentPath.includes('portal') || currentPath.includes('project')) {
+        if (menuValuation) menuValuation.classList.add('active');
+    } else {
+        // 인트로 화면에서는 아무 메뉴도 active 안 함
+    }
+})();
+
+// ─── 로그인 상태 관리 ───
+(function initAuthState() {
+    // 관리자 자동 로그인 초기화 (로그아웃 전까지 유지)
+    // loggedOut 플래그가 없으면 관리자로 자동 설정
+    if (!localStorage.getItem('loggedOut')) {
+        if (!localStorage.getItem('userRole')) {
+            localStorage.setItem('userRole', 'admin');
+            localStorage.setItem('userEmail', 'wksun999@gmail.com');
+            localStorage.setItem('userName', '선웅규');
+        }
+    }
+
+    var role = localStorage.getItem('userRole');
+    var userName = localStorage.getItem('userName');
+    var authButtons = document.getElementById('auth-buttons');
+    var userLoggedIn = document.getElementById('user-logged-in');
+
+    if (role && userName && !localStorage.getItem('loggedOut')) {
+        // 로그인 상태: 사용자 프로필 표시
+        if (authButtons) authButtons.style.display = 'none';
+        if (userLoggedIn) userLoggedIn.style.display = 'contents';
+
+        var avatarEl = document.getElementById('userAvatarText');
+        var nameEl = document.getElementById('userNameDisplay');
+        var badgeEl = document.getElementById('userRoleBadge');
+
+        if (avatarEl) avatarEl.textContent = userName.charAt(0);
+        if (nameEl) nameEl.textContent = userName;
+        if (badgeEl) {
+            var roleLabels = { admin: '관리자', accountant: '회계사', customer: '고객' };
+            badgeEl.textContent = roleLabels[role] || role;
+        }
+    } else {
+        // 비로그인 상태: 로그인/회원가입 버튼 표시
+        if (authButtons) authButtons.style.display = 'contents';
+        if (userLoggedIn) userLoggedIn.style.display = 'none';
+    }
+
+    // 로그인 버튼 클릭
+    var btnLogin = document.getElementById('btnLogin');
+    var btnSignup = document.getElementById('btnSignup');
+    if (btnLogin) {
+        btnLogin.onclick = function() {
+            var currentPath = window.location.pathname;
+            var appIndex = currentPath.indexOf('/app/');
+            if (appIndex !== -1) {
+                var afterApp = currentPath.substring(appIndex + 5);
+                var depth = (afterApp.match(/\//g) || []).length;
+                location.href = '../'.repeat(depth) + 'login.html';
+            } else {
+                location.href = 'app/login.html';
+            }
+        };
+    }
+    if (btnSignup) {
+        btnSignup.onclick = function() {
+            var currentPath = window.location.pathname;
+            var appIndex = currentPath.indexOf('/app/');
+            if (appIndex !== -1) {
+                var afterApp = currentPath.substring(appIndex + 5);
+                var depth = (afterApp.match(/\//g) || []).length;
+                location.href = '../'.repeat(depth) + 'register.html';
+            } else {
+                location.href = 'app/register.html';
+            }
+        };
+    }
+
+    // 로그아웃 버튼 클릭
+    var btnLogout = document.getElementById('btnLogout');
+    if (btnLogout) {
+        btnLogout.onclick = function() {
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            localStorage.setItem('loggedOut', 'true');
+            location.reload();
+        };
+    }
+})();
+
+// 알람 토글
+function toggleNotifications() {
+    alert('알람 기능은 추후 구현됩니다.\n\n현재 알람:\n- 평가 요청이 승인되었습니다\n- 자료 제출이 완료되었습니다\n- 평가 결과가 나왔습니다');
+}
+
+// 모바일 메뉴 토글
+function toggleHeaderMenu() {
+    var right = document.getElementById('headerRight');
+    var btn = document.getElementById('mobileMenuToggle');
+    var overlay = document.getElementById('mobileOverlay');
+    if (right && btn) {
+        right.classList.toggle('show');
+        btn.classList.toggle('active');
+        if (overlay) overlay.classList.toggle('show');
+    }
+}
+
+// 모바일 메뉴 닫기
+function closeMobileMenu() {
+    var right = document.getElementById('headerRight');
+    var btn = document.getElementById('mobileMenuToggle');
+    var overlay = document.getElementById('mobileOverlay');
+    if (right) right.classList.remove('show');
+    if (btn) btn.classList.remove('active');
+    if (overlay) overlay.classList.remove('show');
+}
+</script>

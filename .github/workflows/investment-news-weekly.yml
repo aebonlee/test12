@@ -1,0 +1,40 @@
+name: Investment News Weekly Report
+
+on:
+  schedule:
+    # 매주 월요일 오전 8시 (KST) = 일요일 23:00 (UTC)
+    - cron: '0 23 * * 0'
+  workflow_dispatch:  # 수동 실행 가능
+
+jobs:
+  send-weekly-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd Valuation_Company/scripts/investment-news-scraper
+          pip install -r requirements.txt
+
+      - name: Send weekly report email
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: |
+          cd Valuation_Company/scripts/investment-news-scraper
+          python send_weekly_email.py
+
+      - name: Log completion
+        if: always()
+        run: |
+          echo "Weekly report email completed at $(date)"

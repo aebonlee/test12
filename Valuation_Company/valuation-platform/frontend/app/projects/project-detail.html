@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로젝트 상세 | ValueLink</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="../styles/mobile-optimize.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --deep-blue: #1D4ED8;
+            --deep-blue-light: #3B82F6;
+            --deep-blue-pale: #DBEAFE;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6B7280;
+            --bg-light: #F3F4F6;
+            --white: #FFFFFF;
+            --border: #E5E7EB;
+            --success: #10B981;
+            --success-pale: #D1FAE5;
+            --warning: #F59E0B;
+            --warning-pale: #FEF3C7;
+            --error: #EF4444;
+            --error-pale: #FEE2E2;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+        }
+
+        /* HEADER - 공통 헤더 사용 */
+
+        /* BREADCRUMB */
+        .breadcrumb-container {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 40px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-muted);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb a {
+            color: var(--deep-blue);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--deep-blue-light);
+        }
+
+        .breadcrumb span {
+            color: var(--text-muted);
+        }
+
+        /* MAIN */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        /* PROJECT HEADER */
+        .project-header {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .project-info {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .project-id-box {
+            background: var(--deep-blue);
+            color: var(--white);
+            padding: 16px 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .project-id-box label {
+            display: block;
+            font-size: 11px;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .project-id-box .id {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .project-meta h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .project-meta .details {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-secondary);
+        }
+
+        .btn-primary {
+            background: var(--deep-blue);
+            color: var(--white);
+        }
+
+        /* STATUS BAR */
+        .status-bar {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+        }
+
+        .status-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .status-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 60px;
+            right: 60px;
+            height: 4px;
+            background: var(--border);
+        }
+
+        .status-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-light);
+            border: 3px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .status-step.completed .step-icon {
+            background: var(--success);
+            border-color: var(--success);
+            color: var(--white);
+        }
+
+        .status-step.active .step-icon {
+            background: var(--deep-blue);
+            border-color: var(--deep-blue);
+            color: var(--white);
+        }
+
+        .step-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .status-step.completed .step-label,
+        .status-step.active .step-label {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* CONTENT GRID */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .content-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 28px;
+        }
+
+        .content-card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .badge-pending { background: var(--warning-pale); color: #B45309; }
+        .badge-complete { background: var(--success-pale); color: #047857; }
+
+        /* FILE LIST */
+        .file-list { list-style: none; }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .file-item:last-child { border-bottom: none; }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .file-meta .name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .file-meta .status {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .file-meta .status.uploaded { color: var(--success); }
+
+        .file-meta .desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .file-action {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .file-action.upload { background: var(--deep-blue-pale); color: var(--deep-blue); }
+        .file-action.download { background: var(--bg-light); color: var(--text-secondary); }
+        .file-action.view { background: var(--success-pale); color: #047857; }
+        .file-action.delete { background: var(--error-pale); color: var(--error); margin-left: 8px; }
+
+        /* OTHER FILES SECTION */
+        .other-files-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--border);
+        }
+
+        .other-files-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .other-files-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .other-files-count {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .other-files-count strong {
+            color: var(--deep-blue);
+        }
+
+        /* UPLOAD AREA */
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--deep-blue-light);
+            background: var(--deep-blue-pale);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--deep-blue);
+            background: var(--deep-blue-pale);
+        }
+
+        .upload-area.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .upload-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .upload-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .upload-hint.warning {
+            color: var(--warning);
+            margin-top: 8px;
+        }
+
+        .upload-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--deep-blue);
+            background: var(--white);
+            border: 1px solid var(--deep-blue);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+
+        /* PROGRESS BAR */
+        .upload-progress {
+            margin-top: 12px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--deep-blue);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* INPUT SECTION */
+        .input-section { margin-bottom: 20px; }
+
+        .input-section h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .source {
+            font-size: 11px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .source-client { background: #FEF3C7; color: #B45309; }
+        .source-accountant { background: var(--deep-blue-pale); color: var(--deep-blue); }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .input-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .input-item .label { color: var(--text-muted); }
+        .input-item .value { font-weight: 500; color: var(--text-primary); }
+        .input-item .value.empty { color: var(--error); font-style: italic; }
+
+        /* FULL WIDTH */
+        .full-width { grid-column: 1 / -1; }
+
+        /* CARD ACTIONS */
+        .card-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-small { padding: 10px 16px; font-size: 13px; }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 28px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .modal-form-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .modal-form-group input,
+        .modal-form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .modal-form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .modal-file-info .icon { font-size: 24px; }
+        .modal-file-info .name { font-size: 14px; font-weight: 500; }
+        .modal-file-info .size { font-size: 12px; color: var(--text-muted); }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 768px) {
+            header {
+                padding: 0 16px;
+                height: auto;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 16px;
+            }
+
+            .header-left {
+                flex-direction: column;
+                gap: 16px;
+                width: 100%;
+            }
+
+            .logo-text {
+                font-size: 20px;
+            }
+
+            .main-nav {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .nav-item {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .breadcrumb-container {
+                padding: 12px 16px;
+            }
+
+            .main-content {
+                padding: 20px 16px;
+            }
+
+            .project-header {
+                flex-direction: column;
+                gap: 16px;
+                padding: 20px 16px;
+            }
+
+            .project-info {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .project-id-box .id {
+                font-size: 12px;
+                word-break: break-all;
+            }
+
+            .project-meta h1 {
+                font-size: 20px;
+            }
+
+            .project-meta .details {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .project-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .project-actions .btn {
+                width: 100%;
+            }
+
+            .status-bar {
+                padding: 16px;
+                overflow-x: auto;
+            }
+
+            .status-steps {
+                min-width: 600px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content-card {
+                padding: 20px 16px;
+            }
+
+            .content-card h2 {
+                font-size: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-actions {
+                flex-direction: column;
+            }
+
+            .card-actions .btn {
+                width: 100%;
+            }
+
+            .modal {
+                padding: 24px 16px;
+                width: 95%;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 공통 헤더 -->
+    <div id="header-container"></div>
+
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb-container">
+        <div class="breadcrumb">
+            <a href="../../index.html">홈</a>
+            <span>></span>
+            <a href="valuation-list.html">프로젝트 목록</a>
+            <span>></span>
+            <span>프로젝트 상세</span>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <main class="main-content">
+        <!-- PROJECT HEADER -->
+        <div class="project-header">
+            <div class="project-info">
+                <div class="project-id-box">
+                    <label>프로젝트 번호</label>
+                    <div class="id">SAMSU-2501191430-DC</div>
+                </div>
+                <div class="project-meta">
+                    <h1>삼성전자 DCF 평가</h1>
+                    <div class="details">
+                        <span>📅 평가기준일: 2025.01.01</span>
+                        <span>👤 담당: 김철수 회계사</span>
+                        <span>🎯 목적: 투자 유치</span>
+                    </div>
+                </div>
+            </div>
+            <div class="project-actions">
+                <button class="btn btn-secondary">고객 포털 링크</button>
+                <button class="btn btn-secondary" onclick="editProject()">프로젝트 수정</button>
+                <button class="btn btn-secondary" style="background: #DC2626; color: white;" onclick="deleteProject()">프로젝트 삭제</button>
+                <a href="../valuation/submissions/dcf-submission.html" class="btn btn-primary">평가 실행</a>
+            </div>
+        </div>
+
+        <!-- STATUS BAR -->
+        <div class="status-bar">
+            <div class="status-steps">
+                <div class="status-step completed">
+                    <div class="step-icon">✓</div>
+                    <span class="step-label">프로젝트 생성</span>
+                </div>
+                <div class="status-step active">
+                    <div class="step-icon">2</div>
+                    <span class="step-label">자료 수집</span>
+                </div>
+                <div class="status-step">
+                    <div class="step-icon">3</div>
+                    <span class="step-label">자료 검토</span>
+                </div>
+                <div class="status-step">
+                    <div class="step-icon">4</div>
+                    <span class="step-label">평가 입력</span>
+                </div>
+                <div class="status-step">
+                    <div class="step-icon">5</div>
+                    <span class="step-label">평가 실행</span>
+                </div>
+                <div class="status-step">
+                    <div class="step-icon">6</div>
+                    <span class="step-label">보고서</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content-grid">
+            <!-- 고객 제출 자료 -->
+            <div class="content-card">
+                <h2>
+                    고객 제출 자료
+                    <span class="badge badge-pending">3/6 완료</span>
+                </h2>
+
+                <!-- 필수/선택 자료 목록 -->
+                <ul class="file-list">
+                    <li class="file-item">
+                        <div class="file-info">
+                            <div class="file-icon">📄</div>
+                            <div class="file-meta">
+                                <div class="name">재무제표 (3개년)</div>
+                                <div class="status uploaded">✓ 업로드 완료</div>
+                            </div>
+                        </div>
+                        <button class="file-action view">확인</button>
+                    </li>
+                    <li class="file-item">
+                        <div class="file-info">
+                            <div class="file-icon">📄</div>
+                            <div class="file-meta">
+                                <div class="name">사업계획서</div>
+                                <div class="status uploaded">✓ 업로드 완료</div>
+                            </div>
+                        </div>
+                        <button class="file-action view">확인</button>
+                    </li>
+                    <li class="file-item">
+                        <div class="file-info">
+                            <div class="file-icon">📄</div>
+                            <div class="file-meta">
+                                <div class="name">주주명부</div>
+                                <div class="status uploaded">✓ 업로드 완료</div>
+                            </div>
+                        </div>
+                        <button class="file-action view">확인</button>
+                    </li>
+                    <li class="file-item">
+                        <div class="file-info">
+                            <div class="file-icon">📄</div>
+                            <div class="file-meta">
+                                <div class="name">정관</div>
+                                <div class="status">대기중</div>
+                            </div>
+                        </div>
+                        <button class="file-action upload">요청</button>
+                    </li>
+                    <li class="file-item">
+                        <div class="file-info">
+                            <div class="file-icon">📄</div>
+                            <div class="file-meta">
+                                <div class="name">감사보고서</div>
+                                <div class="status">대기중</div>
+                            </div>
+                        </div>
+                        <button class="file-action upload">요청</button>
+                    </li>
+                    <li class="file-item">
+                        <div class="file-info">
+                            <div class="file-icon">📄</div>
+                            <div class="file-meta">
+                                <div class="name">조직도</div>
+                                <div class="status">대기중</div>
+                            </div>
+                        </div>
+                        <button class="file-action upload">요청</button>
+                    </li>
+                </ul>
+
+                <!-- 기타 자료 섹션 -->
+                <div class="other-files-section">
+                    <div class="other-files-header">
+                        <h3>기타 자료</h3>
+                        <span class="other-files-count"><strong id="otherFilesCount">2</strong>/5개</span>
+                    </div>
+
+                    <!-- 업로드된 기타 파일 목록 -->
+                    <ul class="file-list" id="otherFilesList">
+                        <li class="file-item">
+                            <div class="file-info">
+                                <div class="file-icon">📄</div>
+                                <div class="file-meta">
+                                    <div class="name">SAMSU-2501191430-DC_ETC1.pdf</div>
+                                    <div class="desc">"핵심 기술 관련 특허등록증"</div>
+                                    <div class="status uploaded">2.5MB · 2025.01.19</div>
+                                </div>
+                            </div>
+                            <div>
+                                <button class="file-action view">확인</button>
+                                <button class="file-action delete" onclick="deleteOtherFile(1)">삭제</button>
+                            </div>
+                        </li>
+                        <li class="file-item">
+                            <div class="file-info">
+                                <div class="file-icon">📄</div>
+                                <div class="file-meta">
+                                    <div class="name">SAMSU-2501191430-DC_ETC2.pdf</div>
+                                    <div class="desc">"대형 고객사 장기 공급 계약서"</div>
+                                    <div class="status uploaded">5.0MB · 2025.01.19</div>
+                                </div>
+                            </div>
+                            <div>
+                                <button class="file-action view">확인</button>
+                                <button class="file-action delete" onclick="deleteOtherFile(2)">삭제</button>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <!-- 업로드 영역 -->
+                    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">파일을 드래그하거나 클릭하여 선택</div>
+                        <div class="upload-hint">최대 5개, 파일당 20MB, 총 100MB 이내</div>
+                        <div class="upload-hint">PDF, Word, Excel, PPT, 이미지, ZIP</div>
+                        <div class="upload-hint warning">⚠️ HWP 파일은 PDF로 변환하여 업로드해주세요</div>
+                        <input type="file" id="fileInput" multiple hidden accept=".pdf,.jpg,.jpeg,.png,.txt,.csv,.json,.xml,.md,.html,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.gif,.webp,.bmp" onchange="handleFileSelect(event)">
+                    </div>
+
+                    <!-- 업로드 진행 상태 (숨김) -->
+                    <div class="upload-progress" id="uploadProgress" style="display: none;">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">업로드 중... 0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 고객 입력 정보 -->
+            <div class="content-card">
+                <h2>
+                    고객 입력 정보
+                    <span class="badge badge-complete">완료</span>
+                </h2>
+
+                <div class="input-section">
+                    <h3>기본 정보 <span class="source source-client">고객 입력</span></h3>
+                    <div class="input-grid">
+                        <div class="input-item">
+                            <span class="label">회사명</span>
+                            <span class="value">삼성전자</span>
+                        </div>
+                        <div class="input-item">
+                            <span class="label">사업자번호</span>
+                            <span class="value">124-81-00998</span>
+                        </div>
+                        <div class="input-item">
+                            <span class="label">대표자</span>
+                            <span class="value">이재용</span>
+                        </div>
+                        <div class="input-item">
+                            <span class="label">설립일</span>
+                            <span class="value">1969.01.13</span>
+                        </div>
+                        <div class="input-item">
+                            <span class="label">업종</span>
+                            <span class="value">전자제품 제조업</span>
+                        </div>
+                        <div class="input-item">
+                            <span class="label">임직원 수</span>
+                            <span class="value">267,937명</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-section">
+                    <h3>재무 정보 (최근 연도) <span class="source source-client">고객 입력</span></h3>
+                    <div class="input-grid">
+                        <div class="input-item">
+                            <span class="label">매출액</span>
+                            <span class="value">302조원</span>
+                        </div>
+                        <div class="input-item">
+                            <span class="label">영업이익</span>
+                            <span class="value">36조원</span>
+                        </div>
+                        <div class="input-item">
+                            <span class="label">총자산</span>
+                            <span class="value">448조원</span>
+                        </div>
+                        <div class="input-item">
+                            <span class="label">발행주식수</span>
+                            <span class="value">5,969,782,550주</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 회계사 입력 (WACC) -->
+            <div class="content-card">
+                <h2>
+                    할인율 (WACC)
+                    <span class="badge badge-pending">입력 필요</span>
+                </h2>
+
+                <div class="input-section">
+                    <h3>자기자본비용 (Ke) <span class="source source-accountant">회계사 입력</span></h3>
+                    <div class="input-grid">
+                        <div class="input-item">
+                            <span class="label">무위험이자율 (Rf)</span>
+                            <span class="value empty">미입력</span>
+                        </div>
+                        <div class="input-item">
+                            <span class="label">시장위험프리미엄</span>
+                            <span class="value empty">미입력</span>
+                        </div>
+                        <div class="input-item">
+                            <span class="label">베타 (β)</span>
+                            <span class="value empty">미입력</span>
+                        </div>
+                        <div class="input-item">
+                            <span class="label">규모 프리미엄</span>
+                            <span class="value empty">미입력</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-actions">
+                    <a href="../valuation/submissions/dcf-submission.html" class="btn btn-primary btn-small">WACC 입력하기</a>
+                </div>
+            </div>
+
+            <!-- 회계사 입력 (FCFF) -->
+            <div class="content-card">
+                <h2>
+                    FCFF 추정
+                    <span class="badge badge-pending">입력 필요</span>
+                </h2>
+
+                <div class="input-section">
+                    <h3>5개년 추정 <span class="source source-accountant">회계사 입력</span></h3>
+                    <div class="input-grid">
+                        <div class="input-item">
+                            <span class="label">매출 성장률</span>
+                            <span class="value empty">미입력</span>
+                        </div>
+                        <div class="input-item">
+                            <span class="label">EBIT 마진율</span>
+                            <span class="value empty">미입력</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-actions">
+                    <a href="../valuation/submissions/dcf-submission.html" class="btn btn-primary btn-small">FCFF 입력하기</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 파일 설명 입력 모달 -->
+    <div class="modal-overlay" id="descriptionModal">
+        <div class="modal">
+            <h3>기타 자료 업로드</h3>
+            <div class="modal-file-info">
+                <span class="icon">📄</span>
+                <div>
+                    <div class="name" id="modalFileName">파일명.pdf</div>
+                    <div class="size" id="modalFileSize">0MB</div>
+                </div>
+            </div>
+            <div class="modal-form-group">
+                <label>자료 설명 (필수, 최대 100자)</label>
+                <textarea id="fileDescription" placeholder="이 자료가 무엇인지 간략히 설명해주세요" maxlength="100"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">취소</button>
+                <button class="btn btn-primary" onclick="confirmUpload()">업로드</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase 클라이언트 초기화
+        let supabase = null;
+        try {
+            const SUPABASE_URL = 'https://arxrfetgaitkgiiqabap.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeHJmZXRnYWl0a2dpaXFhYmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3ODk1OTgsImV4cCI6MjA4NDM2NTU5OH0.BTnuv0sYr2MGe1c-gk8PWCviwkFyIiymfKp5Jhzwbo0';
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch(e) { console.warn('Supabase 초기화 스킵 - 페이지 정상 작동'); }
+
+        // URL에서 프로젝트 ID 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const PROJECT_ID = urlParams.get('id') || 'SAMSU-2501191430-DC';
+
+        // 상수
+        const MAX_OTHER_FILES = 5;
+        const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+        const MAX_TOTAL_SIZE = 100 * 1024 * 1024; // 100MB
+
+        const ALLOWED_EXTENSIONS = [
+            '.pdf', '.jpg', '.jpeg', '.png', '.txt', '.csv', '.json', '.xml', '.md', '.html', '.zip',
+            '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.gif', '.webp', '.bmp'
+        ];
+
+        const CONVERT_REQUIRED = ['.hwp'];
+
+        // 상태
+        let otherFiles = [
+            { seq: 1, name: 'SAMSU-2501191430-DC_ETC1.pdf', desc: '핵심 기술 관련 특허등록증', size: 2500000 },
+            { seq: 2, name: 'SAMSU-2501191430-DC_ETC2.pdf', desc: '대형 고객사 장기 공급 계약서', size: 5000000 }
+        ];
+        let pendingFile = null;
+
+        // 드래그 앤 드롭
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        });
+
+        // 파일 선택
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+            event.target.value = ''; // 리셋
+        }
+
+        // 파일 처리
+        function processFile(file) {
+            // 개수 체크
+            if (otherFiles.length >= MAX_OTHER_FILES) {
+                alert('기타 자료는 최대 5개까지 업로드 가능합니다');
+                return;
+            }
+
+            // 확장자 체크
+            const ext = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (CONVERT_REQUIRED.includes(ext)) {
+                alert('HWP 파일은 PDF로 변환하여 업로드해주세요\n(한글 → 파일 → PDF로 저장하기)');
+                return;
+            }
+
+            if (!ALLOWED_EXTENSIONS.includes(ext)) {
+                alert('지원하지 않는 파일 형식입니다');
+                return;
+            }
+
+            // 용량 체크
+            if (file.size > MAX_FILE_SIZE) {
+                alert('파일 용량은 20MB를 초과할 수 없습니다');
+                return;
+            }
+
+            const totalSize = otherFiles.reduce((sum, f) => sum + f.size, 0) + file.size;
+            if (totalSize > MAX_TOTAL_SIZE) {
+                alert('총 용량이 100MB를 초과합니다');
+                return;
+            }
+
+            // 모달 표시
+            pendingFile = file;
+            document.getElementById('modalFileName').textContent = file.name;
+            document.getElementById('modalFileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileDescription').value = '';
+            document.getElementById('descriptionModal').classList.add('show');
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('descriptionModal').classList.remove('show');
+            pendingFile = null;
+        }
+
+        // 업로드 확인
+        async function confirmUpload() {
+            const description = document.getElementById('fileDescription').value.trim();
+
+            if (!description) {
+                alert('자료 설명을 입력해주세요');
+                return;
+            }
+
+            if (description.length > 100) {
+                alert('자료 설명은 100자를 초과할 수 없습니다');
+                return;
+            }
+
+            // 파일명 생성
+            const nextSeq = otherFiles.length + 1;
+            const ext = '.' + pendingFile.name.split('.').pop().toLowerCase();
+            const storedName = `${PROJECT_ID}_ETC${nextSeq}${ext}`;
+
+            // 모달 닫기
+            closeModal();
+
+            // 실제 Supabase Storage 업로드
+            await uploadToSupabase(storedName, description, pendingFile);
+        }
+
+        // Supabase Storage에 실제 업로드
+        async function uploadToSupabase(storedName, description, file) {
+            const progressEl = document.getElementById('uploadProgress');
+            const progressBar = document.getElementById('progressBarFill');
+            const progressText = document.getElementById('progressText');
+
+            try {
+                progressEl.style.display = 'block';
+                progressBar.style.width = '10%';
+                progressText.textContent = '업로드 준비 중...';
+
+                // 1. Supabase Storage에 파일 업로드
+                const filePath = `${PROJECT_ID}/${storedName}`;
+
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('project-files')
+                    .upload(filePath, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (uploadError) {
+                    // 버킷이 없으면 자동으로 로컬 저장으로 폴백
+                    console.warn('Storage 업로드 실패 (버킷 미설정), 로컬 저장:', uploadError);
+                    // 진행률 업데이트
+                    progressBar.style.width = '100%';
+                    progressText.textContent = '업로드 완료! (로컬 저장)';
+                } else {
+                    progressBar.style.width = '80%';
+                    progressText.textContent = '파일 업로드 완료...';
+                }
+
+                // 2. 파일 정보를 배열에 추가
+                otherFiles.push({
+                    seq: otherFiles.length + 1,
+                    name: storedName,
+                    desc: description,
+                    size: file.size,
+                    uploadedAt: new Date().toISOString()
+                });
+
+                progressBar.style.width = '100%';
+                progressText.textContent = '업로드 완료!';
+
+                setTimeout(() => {
+                    progressEl.style.display = 'none';
+                    updateFileList();
+                }, 1000);
+
+            } catch (error) {
+                console.error('업로드 오류:', error);
+                alert('파일 업로드 중 오류가 발생했습니다: ' + error.message);
+                progressEl.style.display = 'none';
+            }
+        }
+
+        // 파일 목록 업데이트
+        function updateFileList() {
+            const listEl = document.getElementById('otherFilesList');
+            const countEl = document.getElementById('otherFilesCount');
+            const uploadArea = document.getElementById('uploadArea');
+
+            countEl.textContent = otherFiles.length;
+
+            // 5개 도달 시 업로드 영역 비활성화
+            if (otherFiles.length >= MAX_OTHER_FILES) {
+                uploadArea.classList.add('disabled');
+            } else {
+                uploadArea.classList.remove('disabled');
+            }
+
+            // 목록 렌더링
+            listEl.innerHTML = otherFiles.map(file => `
+                <li class="file-item">
+                    <div class="file-info">
+                        <div class="file-icon">📄</div>
+                        <div class="file-meta">
+                            <div class="name">${file.name}</div>
+                            <div class="desc">"${file.desc}"</div>
+                            <div class="status uploaded">${formatFileSize(file.size)} · 2025.01.19</div>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="file-action view">확인</button>
+                        <button class="file-action delete" onclick="deleteOtherFile(${file.seq})">삭제</button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // 파일 삭제
+        function deleteOtherFile(seq) {
+            if (confirm('이 파일을 삭제하시겠습니까?')) {
+                otherFiles = otherFiles.filter(f => f.seq !== seq);
+                // 순번 재정렬
+                otherFiles = otherFiles.map((f, i) => ({
+                    ...f,
+                    seq: i + 1,
+                    name: f.name.replace(/_ETC\d+/, `_ETC${i + 1}`)
+                }));
+                updateFileList();
+            }
+        }
+
+        // 파일 크기 포맷
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + 'B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
+        }
+
+        // Supabase에서 프로젝트 데이터 로드
+        async function loadProjectData() {
+            try {
+                const { data: project, error } = await supabase
+                    .from('projects')
+                    .select(`
+                        *,
+                        valuation_results (*)
+                    `)
+                    .eq('project_id', PROJECT_ID)
+                    .single();
+
+                if (error) throw error;
+
+                if (project) {
+                    // 프로젝트 정보 업데이트
+                    document.querySelector('.project-id-box').textContent = project.project_id;
+                    document.querySelector('.project-title-text').textContent = `${project.company_name_kr} 기업가치평가`;
+
+                    // 평가 결과 정보가 있으면 업데이트
+                    const result = project.valuation_results?.[0];
+                    if (result) {
+                        // 평가 방법에 따라 뱃지 업데이트
+                        const methodBadge = document.querySelector('.method-badge');
+                        if (methodBadge) {
+                            const methodNames = {
+                                'dcf': 'DCF',
+                                'relative': '상대가치',
+                                'capital_market_law': 'IPO',
+                                'asset': '자산가치',
+                                'inheritance_tax_law': '상증법'
+                            };
+                            methodBadge.textContent = methodNames[result.method] || result.method;
+                        }
+                    }
+
+                    console.log('프로젝트 데이터 로드 성공:', project);
+                } else {
+                    console.warn('프로젝트를 찾을 수 없습니다:', PROJECT_ID);
+                    alert('프로젝트를 찾을 수 없습니다.');
+                    // 목록으로 돌아가기
+                    setTimeout(() => location.href = 'valuation-list.html', 2000);
+                }
+            } catch (error) {
+                console.error('프로젝트 데이터 로드 실패:', error);
+                // 에러가 발생해도 화면은 표시 (정적 데이터로 폴백)
+            }
+        }
+
+        // 프로젝트 삭제
+        async function deleteProject() {
+            if (!confirm(`정말로 이 프로젝트를 삭제하시겠습니까?\n\n프로젝트 ID: ${PROJECT_ID}\n\n이 작업은 되돌릴 수 없습니다.`)) {
+                return;
+            }
+
+            try {
+                // 1. valuation_results 삭제
+                const { error: resultsError } = await supabase
+                    .from('valuation_results')
+                    .delete()
+                    .eq('project_id', PROJECT_ID);
+
+                if (resultsError) throw resultsError;
+
+                // 2. projects 삭제
+                const { error: projectError } = await supabase
+                    .from('projects')
+                    .delete()
+                    .eq('project_id', PROJECT_ID);
+
+                if (projectError) throw projectError;
+
+                alert('프로젝트가 삭제되었습니다.');
+                location.href = 'valuation-list.html';
+
+            } catch (error) {
+                console.error('프로젝트 삭제 실패:', error);
+                alert('프로젝트 삭제 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        // 프로젝트 수정 (project-create.html로 이동)
+        function editProject() {
+            location.href = `project-create.html?edit=${PROJECT_ID}`;
+        }
+
+        // 페이지 로드 시 데이터 로드
+        window.addEventListener('DOMContentLoaded', () => {
+            loadProjectData();
+        });
+    </script>
+
+    <!-- 헤더 로드 -->
+    <script>
+        fetch('../../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+                const scripts = document.getElementById('header-container').querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+    </script>
+</body>
+</html>

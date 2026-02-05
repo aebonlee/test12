@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>평가보고서 최종안 확인 | ValueLink</title>
+
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="../styles/mobile-optimize.css">
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --deep-blue: #1D4ED8;
+            --deep-green: #166534;
+            --light-green: #DCFCE7;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --white: #FFFFFF;
+            --border: #E5E7EB;
+            --bg-light: #F9FAFB;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --cover-green: #14532D;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+        }
+
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+            gap: 40px;
+        }
+
+        .main-content { flex: 1; min-width: 0; }
+
+        .page-header { margin-bottom: 32px; }
+        .page-title { font-size: 32px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+        .page-description { font-size: 16px; color: var(--text-secondary); line-height: 1.6; }
+
+        /* ====== 보고서 문서 영역 ====== */
+        .report-document {
+            background: white;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 최종안: 워터마크 없음 */
+
+        /* ====== 표지 (Cover) ====== */
+        .report-cover {
+            background: linear-gradient(135deg, var(--cover-green) 0%, #166534 100%);
+            color: white;
+            padding: 80px 60px;
+            text-align: center;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .cover-final-badge {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.5);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .cover-logo {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 40px;
+        }
+
+        .cover-title {
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 16px;
+        }
+
+        .cover-subtitle {
+            font-size: 18px;
+            font-weight: 400;
+            opacity: 0.85;
+            margin-bottom: 48px;
+        }
+
+        .cover-company {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 48px;
+            padding: 16px 40px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+        }
+
+        .cover-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 48px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .cover-info-item { display: flex; gap: 8px; }
+        .cover-info-label { opacity: 0.6; min-width: 80px; }
+        .cover-info-value { font-weight: 600; }
+
+        .cover-report-no {
+            margin-top: 40px;
+            font-size: 13px;
+            opacity: 0.5;
+            letter-spacing: 1px;
+        }
+
+        /* ====== 목차 네비게이션 ====== */
+        .report-toc {
+            padding: 40px 60px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .toc-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--cover-green);
+            display: inline-block;
+        }
+
+        .toc-list {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+
+        .toc-item {
+            counter-increment: toc-counter;
+            padding: 10px 0;
+            border-bottom: 1px dotted #D1D5DB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toc-item a {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .toc-item a:hover { color: var(--deep-green); }
+
+        .toc-item .toc-number {
+            color: var(--cover-green);
+            font-weight: 700;
+            margin-right: 12px;
+        }
+
+        /* ====== 공통 섹션 스타일 ====== */
+        .report-section {
+            padding: 48px 60px;
+            border-bottom: 1px solid var(--border);
+            page-break-inside: avoid;
+        }
+
+        .report-section:last-child { border-bottom: none; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 3px solid var(--cover-green);
+        }
+
+        .section-number {
+            background: var(--cover-green);
+            color: white;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .section-content {
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.9;
+            white-space: pre-line;
+        }
+
+        .section-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 13px;
+        }
+
+        .section-content th,
+        .section-content td {
+            padding: 10px 14px;
+            border: 1px solid #D1D5DB;
+            text-align: left;
+        }
+
+        .section-content th {
+            background: #F3F4F6;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .section-content td { color: #374151; }
+
+        .section-empty {
+            padding: 32px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            background: #F9FAFB;
+            border-radius: 8px;
+            border: 1px dashed var(--border);
+        }
+
+        /* ====== 액션 영역 ====== */
+        .action-area {
+            max-width: 800px;
+            margin: 32px auto 0;
+        }
+
+        .notice-box {
+            padding: 16px 20px;
+            background: #ECFDF5;
+            border-left: 4px solid var(--deep-green);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .notice-box strong {
+            display: block;
+            font-size: 15px;
+            color: var(--deep-green);
+            margin-bottom: 8px;
+        }
+
+        .notice-box ul {
+            margin-left: 20px;
+            font-size: 14px;
+            color: #065F46;
+            line-height: 1.8;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .btn-payment {
+            flex: 1;
+            padding: 18px 24px;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            background: var(--deep-green);
+            border: 2px solid var(--deep-green);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-payment:hover {
+            background: #15803D;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(22, 101, 52, 0.4);
+        }
+
+        /* ====== 상태 표시 ====== */
+        .state-container {
+            text-align: center;
+            padding: 80px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .state-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+        }
+        .state-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+        .state-desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ====== 로딩 ====== */
+        .loading { text-align: center; padding: 60px 20px; }
+        .loading-spinner {
+            width: 48px; height: 48px;
+            border: 4px solid #E5E7EB;
+            border-top-color: var(--deep-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 15px; color: var(--text-secondary); }
+
+        /* ====== 인쇄 스타일 ====== */
+        @media print {
+            body { background: white; }
+            .container { padding: 0; max-width: 100%; }
+            .page-header { display: none; }
+            .action-area { display: none; }
+            .report-document {
+                box-shadow: none;
+                max-width: 100%;
+            }
+            .report-cover { min-height: auto; padding: 60px 40px; page-break-after: always; }
+            .report-toc { page-break-after: always; }
+            .report-section { padding: 32px 40px; page-break-inside: avoid; }
+        }
+
+        /* ====== 반응형 ====== */
+        @media (max-width: 1024px) {
+            .container { flex-direction: column; padding: 20px; }
+        }
+
+        @media (max-width: 768px) {
+            .report-cover { padding: 40px 24px; min-height: 400px; }
+            .cover-title { font-size: 24px; }
+            .cover-company { font-size: 20px; padding: 12px 24px; }
+            .cover-info-grid { grid-template-columns: 1fr; }
+            .report-section { padding: 32px 24px; }
+            .report-toc { padding: 32px 24px; }
+            .section-header { flex-wrap: wrap; }
+            .section-title { font-size: 18px; }
+            .action-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div id="header-container"></div>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">평가보고서 최종안</h1>
+                <p class="page-description">수정 사항이 반영된 최종 평가보고서입니다. 확인 후 잔금 결제를 진행해주세요.</p>
+            </div>
+
+            <!-- 로딩 상태 -->
+            <div id="loadingState" class="loading">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">평가보고서 최종안을 불러오는 중...</p>
+            </div>
+
+            <!-- 최종안 미준비 상태 -->
+            <div id="notReadyState" style="display:none;">
+                <div class="state-container">
+                    <div class="state-icon">&#128221;</div>
+                    <div class="state-title">최종 보고서가 아직 준비되지 않았습니다</div>
+                    <div class="state-desc">담당 공인회계사가 최종 보고서를 완료하면 이 페이지에서 확인하실 수 있습니다.</div>
+                </div>
+            </div>
+
+            <!-- 메인 컨텐츠 (로딩 후 표시) -->
+            <div id="mainContent" style="display: none;">
+
+                <!-- ===== 보고서 문서 ===== -->
+                <div class="report-document">
+
+                    <!-- 1. 표지 (Cover) -->
+                    <div class="report-cover" id="sectionCover">
+                        <div class="cover-final-badge">FINAL</div>
+                        <div class="cover-logo">VALUELINK</div>
+                        <div class="cover-title">기업가치 평가보고서</div>
+                        <div class="cover-subtitle" id="coverMethodName">(최종)</div>
+                        <div class="cover-company" id="coverCompanyName">-</div>
+                        <div class="cover-info-grid">
+                            <div class="cover-info-item">
+                                <span class="cover-info-label">평가기준일</span>
+                                <span class="cover-info-value" id="coverBaseDate">-</span>
+                            </div>
+                            <div class="cover-info-item">
+                                <span class="cover-info-label">평가기관</span>
+                                <span class="cover-info-value">ValueLink</span>
+                            </div>
+                            <div class="cover-info-item">
+                                <span class="cover-info-label">작성일</span>
+                                <span class="cover-info-value" id="coverWriteDate">-</span>
+                            </div>
+                            <div class="cover-info-item">
+                                <span class="cover-info-label">평가방법</span>
+                                <span class="cover-info-value" id="coverMethod">-</span>
+                            </div>
+                        </div>
+                        <div class="cover-report-no" id="coverReportNo">-</div>
+                    </div>
+
+                    <!-- 목차 -->
+                    <div class="report-toc">
+                        <div class="toc-title">목 차</div>
+                        <ul class="toc-list">
+                            <li class="toc-item"><a href="#sec-summary"><span class="toc-number">I.</span> 요약 (Executive Summary)</a></li>
+                            <li class="toc-item"><a href="#sec-overview"><span class="toc-number">II.</span> 평가 개요</a></li>
+                            <li class="toc-item"><a href="#sec-company"><span class="toc-number">III.</span> 회사 개요 및 산업 분석</a></li>
+                            <li class="toc-item"><a href="#sec-financial"><span class="toc-number">IV.</span> 재무 분석</a></li>
+                            <li class="toc-item"><a href="#sec-methodology"><span class="toc-number">V.</span> 평가 방법론 및 가정</a></li>
+                            <li class="toc-item"><a href="#sec-results"><span class="toc-number">VI.</span> 평가 결과</a></li>
+                            <li class="toc-item"><a href="#sec-sensitivity"><span class="toc-number">VII.</span> 민감도 분석</a></li>
+                            <li class="toc-item"><a href="#sec-conclusion"><span class="toc-number">VIII.</span> 결론</a></li>
+                            <li class="toc-item"><a href="#sec-appendix"><span class="toc-number">IX.</span> 부록</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- 섹션 I: 요약 -->
+                    <div class="report-section" id="sec-summary">
+                        <div class="section-header">
+                            <div class="section-number">I</div>
+                            <div class="section-title">요약 (Executive Summary)</div>
+                        </div>
+                        <div class="section-content" id="content-summary"></div>
+                    </div>
+
+                    <!-- 섹션 II: 평가 개요 -->
+                    <div class="report-section" id="sec-overview">
+                        <div class="section-header">
+                            <div class="section-number">II</div>
+                            <div class="section-title">평가 개요</div>
+                        </div>
+                        <div class="section-content" id="content-overview"></div>
+                    </div>
+
+                    <!-- 섹션 III: 회사 개요 및 산업 분석 -->
+                    <div class="report-section" id="sec-company">
+                        <div class="section-header">
+                            <div class="section-number">III</div>
+                            <div class="section-title">회사 개요 및 산업 분석</div>
+                        </div>
+                        <div class="section-content" id="content-company"></div>
+                    </div>
+
+                    <!-- 섹션 IV: 재무 분석 -->
+                    <div class="report-section" id="sec-financial">
+                        <div class="section-header">
+                            <div class="section-number">IV</div>
+                            <div class="section-title">재무 분석</div>
+                        </div>
+                        <div class="section-content" id="content-financial"></div>
+                    </div>
+
+                    <!-- 섹션 V: 평가 방법론 및 가정 -->
+                    <div class="report-section" id="sec-methodology">
+                        <div class="section-header">
+                            <div class="section-number">V</div>
+                            <div class="section-title">평가 방법론 및 가정</div>
+                        </div>
+                        <div class="section-content" id="content-methodology"></div>
+                    </div>
+
+                    <!-- 섹션 VI: 평가 결과 -->
+                    <div class="report-section" id="sec-results">
+                        <div class="section-header">
+                            <div class="section-number">VI</div>
+                            <div class="section-title">평가 결과</div>
+                        </div>
+                        <div class="section-content" id="content-results"></div>
+                    </div>
+
+                    <!-- 섹션 VII: 민감도 분석 -->
+                    <div class="report-section" id="sec-sensitivity">
+                        <div class="section-header">
+                            <div class="section-number">VII</div>
+                            <div class="section-title">민감도 분석</div>
+                        </div>
+                        <div class="section-content" id="content-sensitivity"></div>
+                    </div>
+
+                    <!-- 섹션 VIII: 결론 -->
+                    <div class="report-section" id="sec-conclusion">
+                        <div class="section-header">
+                            <div class="section-number">VIII</div>
+                            <div class="section-title">결론</div>
+                        </div>
+                        <div class="section-content" id="content-conclusion"></div>
+                    </div>
+
+                    <!-- 섹션 IX: 부록 -->
+                    <div class="report-section" id="sec-appendix">
+                        <div class="section-header">
+                            <div class="section-number">IX</div>
+                            <div class="section-title">부록</div>
+                        </div>
+                        <div class="section-content" id="content-appendix"></div>
+                    </div>
+
+                </div>
+                <!-- /보고서 문서 -->
+
+                <!-- 액션 영역 -->
+                <div class="action-area">
+                    <div class="notice-box">
+                        <strong>최종안 확인 완료</strong>
+                        <ul>
+                            <li>본 보고서는 수정 요청 사항이 반영된 <strong>최종안</strong>입니다.</li>
+                            <li>잔금 결제 완료 후 최종 보고서를 다운로드하실 수 있습니다.</li>
+                            <li>추가 문의 사항은 담당 공인회계사에게 연락해주세요.</li>
+                        </ul>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="#" id="btnPayment" class="btn-payment">잔금 결제하기</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- 헤더 로드 -->
+    <script>
+        fetch('../../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+                const scripts = document.getElementById('header-container').querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) { newScript.src = script.src; }
+                    else { newScript.textContent = script.textContent; }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+    </script>
+
+    <!-- 페이지 스크립트 -->
+    <script>
+        // ====== Supabase 초기화 ======
+        const SUPABASE_URL = 'https://arxrfetgaitkgiiqabap.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeHJmZXRnYWl0a2dpaXFhYmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNzIxNDMsImV4cCI6MjA2Mjk0ODE0M30.aGSJFVFW5P_E9l4sBz5_7MWJiN5YOhMJXBbLPi7bo0';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ====== 상수 ======
+        const METHOD_NAMES = {
+            dcf: 'DCF평가법',
+            relative: '상대가치평가법',
+            intrinsic: '본질가치평가법',
+            asset: '자산가치평가법',
+            inheritance_tax: '상증세법평가법'
+        };
+
+        const METHOD_FULL_NAMES = {
+            dcf: 'DCF평가법 (현금흐름할인법)',
+            relative: '상대가치평가법 (유사기업비교법)',
+            intrinsic: '본질가치평가법',
+            asset: '자산가치평가법 (순자산가치법)',
+            inheritance_tax: '상증세법평가법 (상속세및증여세법)'
+        };
+
+        const SECTION_KEYS = [
+            'summary', 'overview', 'company', 'financial',
+            'methodology', 'results', 'sensitivity', 'conclusion', 'appendix'
+        ];
+
+        // ====== URL 파라미터 ======
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('projectId') || urlParams.get('id');
+        const method = urlParams.get('method');
+
+        // ====== 상태 표시 함수 ======
+        function showState(stateId) {
+            ['loadingState', 'notReadyState', 'mainContent'].forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+            document.getElementById(stateId).style.display = 'block';
+        }
+
+        // ====== 페이지 초기화 ======
+        async function initPage() {
+            if (!projectId || !method) {
+                showState('notReadyState');
+                document.querySelector('#notReadyState .state-title').textContent = '잘못된 접근입니다';
+                document.querySelector('#notReadyState .state-desc').textContent = '프로젝트 ID 또는 평가법 정보가 없습니다.';
+                return;
+            }
+
+            try {
+                // 1. 프로젝트 정보 조회
+                const { data: project, error: projError } = await supabase
+                    .from('projects')
+                    .select('project_id, company_name, valuation_date')
+                    .eq('project_id', projectId)
+                    .single();
+
+                if (projError) {
+                    console.error('프로젝트 조회 오류:', projError);
+                    showState('notReadyState');
+                    document.querySelector('#notReadyState .state-title').textContent = '프로젝트를 찾을 수 없습니다';
+                    document.querySelector('#notReadyState .state-desc').textContent = '프로젝트 ID: ' + projectId;
+                    return;
+                }
+
+                // draft_method_status에서 방법별 상태 확인
+                const { data: methodStatus } = await supabase
+                    .from('draft_method_status')
+                    .select('draft_status, draft_submitted_at, final_report_url')
+                    .eq('project_id', projectId)
+                    .eq('method', method)
+                    .maybeSingle();
+                const status = methodStatus ? methodStatus.draft_status : 'not_started';
+
+                // 최종안이 완료되지 않은 경우 (finalized가 아닌 경우)
+                if (status !== 'finalized') {
+                    showState('notReadyState');
+                    return;
+                }
+
+                // 2. 섹션 내용 로드
+                const { data: sections, error: secError } = await supabase
+                    .from('report_draft_sections')
+                    .select('*')
+                    .eq('project_id', projectId)
+                    .eq('method', method);
+
+                if (secError) {
+                    console.error('섹션 로드 오류:', secError);
+                    showState('notReadyState');
+                    document.querySelector('#notReadyState .state-title').textContent = '보고서를 불러올 수 없습니다';
+                    document.querySelector('#notReadyState .state-desc').textContent = '오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+                    return;
+                }
+
+                // 섹션 데이터를 key로 매핑
+                const sectionMap = {};
+                (sections || []).forEach(s => {
+                    sectionMap[s.section_key] = s;
+                });
+
+                // 3. 표지 렌더링
+                renderCover(project, method);
+
+                // 4. 섹션 내용 렌더링
+                renderSections(sectionMap);
+
+                // 5. 결제 버튼 설정
+                document.getElementById('btnPayment').href =
+                    'balance-payment.html?projectId=' + encodeURIComponent(projectId) + '&method=' + encodeURIComponent(method);
+
+                // 6. 표시
+                showState('mainContent');
+
+            } catch (err) {
+                console.error('페이지 초기화 오류:', err);
+                showState('notReadyState');
+                document.querySelector('#notReadyState .state-title').textContent = '오류가 발생했습니다';
+                document.querySelector('#notReadyState .state-desc').textContent = err.message;
+            }
+        }
+
+        // ====== 표지 렌더링 ======
+        function renderCover(project, method) {
+            var methodFullName = METHOD_FULL_NAMES[method] || method;
+            var methodName = METHOD_NAMES[method] || method;
+            var companyName = project.company_name || '-';
+            var today = new Date();
+            var writeDate = today.getFullYear() + '년 ' + (today.getMonth() + 1) + '월 ' + today.getDate() + '일';
+            var baseDate = project.valuation_date || writeDate;
+
+            document.getElementById('coverMethodName').textContent = methodFullName + ' (최종)';
+            document.getElementById('coverCompanyName').textContent = companyName;
+            document.getElementById('coverBaseDate').textContent = baseDate;
+            document.getElementById('coverWriteDate').textContent = writeDate;
+            document.getElementById('coverMethod').textContent = methodName;
+            document.getElementById('coverReportNo').textContent = 'FINAL-' + projectId;
+        }
+
+        // ====== 섹션 내용 렌더링 ======
+        function renderSections(sectionMap) {
+            SECTION_KEYS.forEach(function(key) {
+                var el = document.getElementById('content-' + key);
+                if (!el) return;
+
+                var section = sectionMap[key];
+                if (section && section.content && section.content.trim()) {
+                    var content = section.content.trim();
+                    // HTML 태그가 포함된 경우 innerHTML, 아니면 textContent
+                    if (content.includes('<') && content.includes('>')) {
+                        el.innerHTML = content;
+                    } else {
+                        el.textContent = content;
+                    }
+                } else {
+                    el.innerHTML = '<div class="section-empty">이 섹션의 내용이 아직 작성되지 않았습니다.</div>';
+                }
+            });
+        }
+
+        // ====== TOC 스무스 스크롤 ======
+        document.querySelectorAll('.toc-item a').forEach(function(a) {
+            a.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = document.querySelector(a.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // 페이지 로드
+        initPage();
+    </script>
+</body>
+</html>

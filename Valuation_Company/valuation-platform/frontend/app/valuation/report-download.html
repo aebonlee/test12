@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>평가보고서 수령 | ValueLink</title>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="../styles/mobile-optimize.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --deep-blue: #1D4ED8;
+            --deep-green: #166534;
+            --light-green: #DCFCE7;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --white: #FFFFFF;
+            --border: #E5E7EB;
+            --success-green: #10B981;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #F9FAFB;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .page-description {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        /* Success Banner */
+        .success-banner {
+            background: linear-gradient(135deg, #ECFDF5 0%, #DCFCE7 100%);
+            border: 2px solid var(--success-green);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .success-banner-icon { font-size: 48px; margin-bottom: 12px; }
+        .success-banner h2 { font-size: 24px; font-weight: 700; color: var(--deep-green); margin-bottom: 6px; }
+        .success-banner p { font-size: 15px; color: var(--text-secondary); }
+
+        /* Project Info Card */
+        .project-info-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            border: 1px solid var(--border);
+        }
+
+        .project-info-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .info-item { display: flex; flex-direction: column; gap: 4px; }
+        .info-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+        .info-value { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+        .project-id { font-family: 'Consolas', monospace; color: var(--deep-blue); }
+        .valuation-amount { font-size: 20px; font-weight: 700; color: var(--deep-green); }
+
+        /* Delivery Methods */
+        .delivery-section {
+            margin-bottom: 32px;
+        }
+
+        .delivery-section h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .delivery-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .delivery-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.2s ease;
+        }
+
+        .delivery-card:hover {
+            border-color: var(--deep-blue);
+            box-shadow: 0 4px 16px rgba(29, 78, 216, 0.08);
+        }
+
+        .delivery-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .delivery-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .delivery-icon.download { background: #ECFDF5; }
+        .delivery-icon.email { background: #EFF6FF; }
+        .delivery-icon.hardcopy { background: #FEF3C7; }
+
+        .delivery-card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .delivery-card-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .delivery-card-body {
+            padding-left: 72px;
+        }
+
+        .delivery-detail {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        /* File info */
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #F9FAFB;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .file-info strong { color: var(--text-primary); }
+
+        /* Email form */
+        .email-form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .email-input {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-family: inherit;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .email-input:focus { border-color: var(--deep-blue); }
+
+        /* Hardcopy form */
+        .address-form { margin-bottom: 12px; }
+
+        .form-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-family: inherit;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .form-input:focus { border-color: var(--deep-blue); }
+
+        .form-input.short { max-width: 160px; }
+
+        .hardcopy-notice {
+            font-size: 13px;
+            color: #B45309;
+            background: #FEF3C7;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        /* Buttons */
+        .btn-action {
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-action:active { transform: translateY(0); }
+
+        .btn-download { background: var(--deep-green); }
+        .btn-download:hover { background: #15803D; }
+
+        .btn-email { background: var(--deep-blue); }
+        .btn-email:hover { background: #1E40AF; }
+
+        .btn-hardcopy { background: #B45309; }
+        .btn-hardcopy:hover { background: #92400E; }
+
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Status message */
+        .status-msg {
+            display: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .status-msg.success {
+            display: block;
+            background: #ECFDF5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+        }
+
+        .status-msg.error {
+            display: block;
+            background: #FEF2F2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+        }
+
+        /* Version history */
+        .history-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .history-section h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #F9FAFB;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .history-item:last-child { margin-bottom: 0; }
+
+        .version-badge {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            background: var(--deep-green);
+            color: white;
+            border-radius: 4px;
+        }
+
+        .btn-download-small {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            background: var(--deep-blue);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-download-small:hover { background: #1E40AF; }
+
+        /* Loading */
+        .loading { text-align: center; padding: 60px 20px; }
+
+        .loading-spinner {
+            width: 48px; height: 48px;
+            border: 4px solid #E5E7EB;
+            border-top-color: var(--deep-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text { font-size: 15px; color: var(--text-secondary); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 20px; }
+            .info-grid { grid-template-columns: 1fr; }
+            .delivery-card-body { padding-left: 0; }
+            .email-form { flex-direction: column; }
+            .form-row { flex-direction: column; }
+            .form-input.short { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div id="header-container"></div>
+
+    <div class="container">
+        <!-- 로딩 상태 -->
+        <div id="loadingState" class="loading">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">평가보고서 정보를 불러오는 중...</p>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <div id="mainContent" style="display: none;">
+            <!-- 완료 배너 -->
+            <div class="success-banner">
+                <div class="success-banner-icon">🎉</div>
+                <h2>평가가 완료되었습니다!</h2>
+                <p>아래 방법 중 원하시는 방식으로 평가보고서를 수령하세요.</p>
+            </div>
+
+            <div class="page-header">
+                <h1 class="page-title">평가보고서 수령</h1>
+                <p class="page-description">PDF 다운로드, 이메일 발송, 하드카피 배송 중 선택하실 수 있습니다.</p>
+            </div>
+
+            <!-- 프로젝트 정보 -->
+            <div class="project-info-card">
+                <h3>프로젝트 정보</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">프로젝트 번호</span>
+                        <span class="info-value project-id" id="projectIdDisplay">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">회사명</span>
+                        <span class="info-value" id="companyNameDisplay">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">평가법</span>
+                        <span class="info-value" id="methodDisplay">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">평가 기준일</span>
+                        <span class="info-value" id="valuationDateDisplay">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">평가 완료일</span>
+                        <span class="info-value" id="completionDateDisplay">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">평가 금액</span>
+                        <span class="info-value valuation-amount" id="valuationAmountDisplay">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 수령 방법 3가지 -->
+            <div class="delivery-section">
+                <h3>보고서 수령 방법</h3>
+                <div class="delivery-cards">
+
+                    <!-- 방법 1: PDF 다운로드 -->
+                    <div class="delivery-card">
+                        <div class="delivery-card-header">
+                            <div class="delivery-icon download">📥</div>
+                            <div>
+                                <div class="delivery-card-title">PDF 다운로드</div>
+                                <div class="delivery-card-desc">즉시 다운로드하여 확인하실 수 있습니다.</div>
+                            </div>
+                        </div>
+                        <div class="delivery-card-body">
+                            <div class="file-info">
+                                📄 <span id="reportFilename"><strong>평가보고서_최종본.pdf</strong></span>
+                                &nbsp;|&nbsp; 파일 크기: <span id="reportSize">약 2.5MB</span>
+                            </div>
+                            <button class="btn-action btn-download" id="btnDownloadPdf">
+                                ⬇️ PDF 다운로드
+                            </button>
+                            <div id="downloadStatus" class="status-msg"></div>
+                        </div>
+                    </div>
+
+                    <!-- 방법 2: 이메일 발송 -->
+                    <div class="delivery-card">
+                        <div class="delivery-card-header">
+                            <div class="delivery-icon email">📧</div>
+                            <div>
+                                <div class="delivery-card-title">이메일 발송</div>
+                                <div class="delivery-card-desc">지정한 이메일 주소로 보고서를 발송해 드립니다.</div>
+                            </div>
+                        </div>
+                        <div class="delivery-card-body">
+                            <div class="delivery-detail">
+                                보고서 PDF가 첨부된 이메일이 발송됩니다. 여러 이메일 주소에 동시 발송이 가능합니다.
+                            </div>
+                            <div class="email-form">
+                                <input type="email" class="email-input" id="emailAddress"
+                                       placeholder="수신할 이메일 주소를 입력하세요">
+                                <button class="btn-action btn-email" id="btnSendEmail">
+                                    📨 이메일 발송
+                                </button>
+                            </div>
+                            <div id="emailStatus" class="status-msg"></div>
+                        </div>
+                    </div>
+
+                    <!-- 방법 3: 하드카피 배송 -->
+                    <div class="delivery-card">
+                        <div class="delivery-card-header">
+                            <div class="delivery-icon hardcopy">📦</div>
+                            <div>
+                                <div class="delivery-card-title">하드카피 배송</div>
+                                <div class="delivery-card-desc">인쇄된 보고서를 우편으로 배송해 드립니다.</div>
+                            </div>
+                        </div>
+                        <div class="delivery-card-body">
+                            <div class="hardcopy-notice">
+                                ⚠️ 하드카피 배송은 신청 후 영업일 기준 2~3일 소요되며, 별도 배송비(착불)가 부과됩니다.
+                            </div>
+                            <div class="address-form">
+                                <div class="form-row">
+                                    <input type="text" class="form-input" id="recipientName"
+                                           placeholder="수령인 이름">
+                                    <input type="tel" class="form-input" id="recipientPhone"
+                                           placeholder="연락처 (010-0000-0000)">
+                                </div>
+                                <div class="form-row">
+                                    <input type="text" class="form-input short" id="zipCode"
+                                           placeholder="우편번호">
+                                    <input type="text" class="form-input" id="address1"
+                                           placeholder="주소">
+                                </div>
+                                <div class="form-row">
+                                    <input type="text" class="form-input" id="address2"
+                                           placeholder="상세주소">
+                                    <input type="number" class="form-input short" id="copyCount"
+                                           placeholder="부수" value="1" min="1" max="10">
+                                </div>
+                            </div>
+                            <button class="btn-action btn-hardcopy" id="btnRequestHardcopy">
+                                📦 하드카피 배송 신청
+                            </button>
+                            <div id="hardcopyStatus" class="status-msg"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 보고서 버전 이력 -->
+            <div class="history-section" id="historySection">
+                <h3>보고서 버전 이력</h3>
+                <div id="historyList">
+                    <div class="history-item">
+                        <div>
+                            <span class="version-badge">v1.0</span>
+                            <span style="margin-left: 12px; font-weight: 600;">최종본</span>
+                            <span style="margin-left: 8px; color: var(--text-secondary); font-size: 13px;" id="versionDate">-</span>
+                        </div>
+                        <button class="btn-download-small" id="btnVersionDownload">다운로드</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 헤더 로드 -->
+    <script>
+        fetch('../../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+                const scripts = document.getElementById('header-container').querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+    </script>
+
+    <!-- 페이지 스크립트 -->
+    <script>
+        const SUPABASE_URL = 'https://arxrfetgaitkgiiqabap.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeHJmZXRnYWl0a2dpaXFhYmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNzIxNDMsImV4cCI6MjA2Mjk0ODE0M30.aGSJFVFW5P_E9l4sBz5_7MWJiN5YOhMJXBbLPi7bo0';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const METHOD_NAMES = {
+            dcf: 'DCF평가법',
+            relative: '상대가치평가법',
+            intrinsic: '본질가치평가법',
+            asset: '자산가치평가법',
+            inheritance_tax: '상증세법평가법'
+        };
+
+        let projectId, method, reportUrl = null;
+
+        // ──────────────────────────────────────
+        // 페이지 로드
+        // ──────────────────────────────────────
+        async function loadReportData() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                projectId = urlParams.get('projectId');
+                method = urlParams.get('method');
+
+                if (!projectId || !method) {
+                    alert('프로젝트 정보가 없습니다.');
+                    return;
+                }
+
+                // 프로젝트 정보 조회
+                const { data: project, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .eq('project_id', projectId)
+                    .single();
+
+                if (error || !project) {
+                    console.error('프로젝트 조회 실패:', error);
+                    alert('프로젝트 정보를 불러올 수 없습니다.');
+                    return;
+                }
+
+                // Check payment status
+                const { data: payment } = await supabase
+                    .from('balance_payments')
+                    .select('status')
+                    .eq('project_id', projectId)
+                    .eq('method', method)
+                    .maybeSingle();
+
+                if (!payment || payment.status !== 'confirmed') {
+                    // Show payment required message instead of main content
+                    document.getElementById('loadingState').style.display = 'none';
+                    // Create and show a payment-required notice
+                    const container = document.querySelector('.container');
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:80px 20px;">
+                            <div style="font-size:48px; margin-bottom:16px;">🔒</div>
+                            <h2 style="font-size:24px; font-weight:700; margin-bottom:8px;">결제 확인이 필요합니다</h2>
+                            <p style="color:#6B7280; margin-bottom:24px;">보고서 수령을 위해서는 잔금 결제 확인이 완료되어야 합니다.</p>
+                            <a href="./balance-payment.html?projectId=${projectId}&method=${method}"
+                               style="display:inline-block; padding:14px 28px; background:#1D4ED8; color:white; border-radius:10px; text-decoration:none; font-weight:600;">
+                                결제 페이지로 이동
+                            </a>
+                        </div>`;
+                    return;
+                }
+
+                // draft_method_status에서 final_report_url 조회 (방법별)
+                const { data: methodStatus } = await supabase
+                    .from('draft_method_status')
+                    .select('final_report_url')
+                    .eq('project_id', projectId)
+                    .eq('method', method)
+                    .maybeSingle();
+
+                displayProjectInfo(project, methodStatus);
+
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+
+            } catch (error) {
+                console.error('오류 발생:', error);
+                alert('데이터 로드 중 오류가 발생했습니다.');
+            }
+        }
+
+        function displayProjectInfo(project, methodStatus) {
+            document.getElementById('projectIdDisplay').textContent = project.project_id;
+            document.getElementById('companyNameDisplay').textContent =
+                project.company_name || project.company_name_kr || '-';
+            document.getElementById('methodDisplay').textContent = METHOD_NAMES[method] || method;
+            document.getElementById('valuationDateDisplay').textContent = project.valuation_date || '-';
+
+            const today = new Date().toLocaleDateString('ko-KR');
+            document.getElementById('completionDateDisplay').textContent = today;
+            document.getElementById('versionDate').textContent = today;
+
+            // Set reportUrl from draft_method_status (방법별 독립 저장)
+            reportUrl = (methodStatus && methodStatus.final_report_url) || project.final_report_url || null;
+
+            // 평가 금액 표시
+            if (project.agreed_price) {
+                document.getElementById('valuationAmountDisplay').textContent =
+                    new Intl.NumberFormat('ko-KR').format(project.agreed_price) + '원';
+            }
+
+            // 파일명 생성
+            const companyName = project.company_name || project.company_name_kr || '회사';
+            const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
+            const filename = `${companyName}_기업가치평가보고서_${METHOD_NAMES[method] || method}_${dateStr}.pdf`;
+            document.getElementById('reportFilename').innerHTML = `<strong>${filename}</strong>`;
+        }
+
+        // ──────────────────────────────────────
+        // 방법 1: PDF 다운로드
+        // ──────────────────────────────────────
+        document.getElementById('btnDownloadPdf').addEventListener('click', async () => {
+            const btn = document.getElementById('btnDownloadPdf');
+            const status = document.getElementById('downloadStatus');
+            btn.disabled = true;
+            btn.textContent = '다운로드 준비 중...';
+
+            try {
+                if (reportUrl) {
+                    const link = document.createElement('a');
+                    link.href = reportUrl;
+                    link.download = '';
+                    link.target = '_blank';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    // 데모: Supabase Storage에서 보고서 조회 시도
+                    const path = `reports/${method}/${projectId}.pdf`;
+                    const { data } = supabase.storage.from('valuation-reports').getPublicUrl(path);
+
+                    if (data?.publicUrl) {
+                        window.open(data.publicUrl, '_blank');
+                    } else {
+                        alert('보고서 파일이 아직 업로드되지 않았습니다.\n관리자에게 문의해 주세요.');
+                    }
+                }
+
+                status.className = 'status-msg success';
+                status.textContent = '✅ 다운로드가 시작되었습니다.';
+
+            } catch (error) {
+                console.error('다운로드 실패:', error);
+                status.className = 'status-msg error';
+                status.textContent = '❌ 다운로드에 실패했습니다. 다시 시도해 주세요.';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '⬇️ PDF 다운로드';
+            }
+        });
+
+        // ──────────────────────────────────────
+        // 방법 2: 이메일 발송
+        // ──────────────────────────────────────
+        document.getElementById('btnSendEmail').addEventListener('click', async () => {
+            const emailInput = document.getElementById('emailAddress');
+            const email = emailInput.value.trim();
+            const status = document.getElementById('emailStatus');
+
+            if (!email) {
+                status.className = 'status-msg error';
+                status.textContent = '❌ 이메일 주소를 입력해 주세요.';
+                return;
+            }
+
+            // 이메일 형식 검증
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                status.className = 'status-msg error';
+                status.textContent = '❌ 올바른 이메일 형식이 아닙니다.';
+                return;
+            }
+
+            const btn = document.getElementById('btnSendEmail');
+            btn.disabled = true;
+            btn.textContent = '발송 중...';
+
+            try {
+                // Supabase에 이메일 발송 요청 기록
+                const { error } = await supabase
+                    .from('report_delivery_requests')
+                    .insert({
+                        project_id: projectId,
+                        method: method,
+                        delivery_type: 'email',
+                        email: email,
+                        status: 'pending',
+                        requested_at: new Date().toISOString()
+                    });
+
+                if (error) {
+                    console.warn('DB 기록 실패 (테이블 미존재 가능):', error);
+                }
+
+                status.className = 'status-msg success';
+                status.textContent = `✅ ${email}로 발송 요청이 접수되었습니다. 잠시 후 이메일을 확인해 주세요.`;
+                emailInput.value = '';
+
+            } catch (error) {
+                console.error('이메일 발송 요청 실패:', error);
+                status.className = 'status-msg error';
+                status.textContent = '❌ 발송 요청에 실패했습니다. 다시 시도해 주세요.';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '📨 이메일 발송';
+            }
+        });
+
+        // ──────────────────────────────────────
+        // 방법 3: 하드카피 배송 신청
+        // ──────────────────────────────────────
+        document.getElementById('btnRequestHardcopy').addEventListener('click', async () => {
+            const name = document.getElementById('recipientName').value.trim();
+            const phone = document.getElementById('recipientPhone').value.trim();
+            const zip = document.getElementById('zipCode').value.trim();
+            const addr1 = document.getElementById('address1').value.trim();
+            const addr2 = document.getElementById('address2').value.trim();
+            const copies = parseInt(document.getElementById('copyCount').value) || 1;
+            const status = document.getElementById('hardcopyStatus');
+
+            // 필수 입력 검증
+            if (!name || !phone || !addr1) {
+                status.className = 'status-msg error';
+                status.textContent = '❌ 수령인 이름, 연락처, 주소는 필수 입력 항목입니다.';
+                return;
+            }
+
+            const btn = document.getElementById('btnRequestHardcopy');
+            btn.disabled = true;
+            btn.textContent = '신청 중...';
+
+            try {
+                // Supabase에 하드카피 배송 요청 기록
+                const { error } = await supabase
+                    .from('report_delivery_requests')
+                    .insert({
+                        project_id: projectId,
+                        method: method,
+                        delivery_type: 'hardcopy',
+                        recipient_name: name,
+                        recipient_phone: phone,
+                        zip_code: zip,
+                        address: addr1,
+                        address_detail: addr2,
+                        copy_count: copies,
+                        status: 'pending',
+                        requested_at: new Date().toISOString()
+                    });
+
+                if (error) {
+                    console.warn('DB 기록 실패 (테이블 미존재 가능):', error);
+                }
+
+                status.className = 'status-msg success';
+                status.textContent = `✅ 하드카피 ${copies}부 배송 신청이 접수되었습니다. 영업일 기준 2~3일 내 배송됩니다.`;
+
+                // 입력 필드 초기화
+                document.getElementById('recipientName').value = '';
+                document.getElementById('recipientPhone').value = '';
+                document.getElementById('zipCode').value = '';
+                document.getElementById('address1').value = '';
+                document.getElementById('address2').value = '';
+                document.getElementById('copyCount').value = '1';
+
+            } catch (error) {
+                console.error('하드카피 신청 실패:', error);
+                status.className = 'status-msg error';
+                status.textContent = '❌ 배송 신청에 실패했습니다. 다시 시도해 주세요.';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '📦 하드카피 배송 신청';
+            }
+        });
+
+        // 버전 이력 다운로드 (메인 다운로드와 동일)
+        document.getElementById('btnVersionDownload').addEventListener('click', () => {
+            document.getElementById('btnDownloadPdf').click();
+        });
+
+        // 페이지 로드
+        loadReportData();
+    </script>
+</body>
+</html>

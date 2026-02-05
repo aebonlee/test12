@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 - ValueLink</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="../styles/mobile-optimize.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .loading-wrapper {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 72px);
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .loading-subtext {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .error-container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .error-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #DC2626;
+            margin-bottom: 12px;
+        }
+
+        .error-message {
+            font-size: 15px;
+            color: #6B7280;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 32px;
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            background: #1D4ED8;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #1E40AF;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 공통 헤더 -->
+    <div id="header-container"></div>
+
+    <div class="loading-wrapper">
+    <div class="loading-container" id="loadingContainer">
+        <div class="spinner"></div>
+        <div class="loading-text">마이페이지 로딩 중...</div>
+        <div class="loading-subtext">역할을 확인하고 있습니다</div>
+    </div>
+    </div> <!-- /loading-wrapper -->
+
+    <!-- 헤더 로드 -->
+    <script>
+        fetch('../../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+                const scripts = document.getElementById('header-container').querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+    </script>
+
+    <script>
+        // Supabase 초기화
+        let supabase = null;
+        try {
+            const SUPABASE_URL = 'https://arxrfetgaitkgiiqabap.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeHJmZXRnYWl0a2dpaXFhYmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3ODk1OTgsImV4cCI6MjA4NDM2NTU5OH0.BTnuv0sYr2MGe1c-gk8PWCviwkFyIiymfKp5Jhzwbo0';
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch(e) { console.warn('Supabase 초기화 스킵 - 페이지 정상 작동'); }
+
+        // 역할별 페이지 라우팅
+        async function routeToRoleBasedPage() {
+            try {
+                // 1. 로그인 확인
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+                // 테스트용: 로그인 안 되어 있으면 회사 마이페이지로 바로 이동
+                if (authError || !user) {
+                    console.log('테스트 모드: 회사 마이페이지로 이동');
+                    window.location.href = 'mypage-company.html';
+                    return;
+                }
+
+                console.log('User authenticated:', user.email);
+
+                // 2. users 테이블에서 role 조회
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('role, name, is_active')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (userError) {
+                    console.error('User data fetch error:', userError);
+
+                    // users 테이블에 데이터가 없는 경우 (신규 사용자)
+                    if (userError.code === 'PGRST116') {
+                        showError(
+                            '프로필 설정이 필요합니다',
+                            '회원가입을 완료하려면 프로필을 설정해주세요.',
+                            '/register?step=profile'
+                        );
+                        return;
+                    }
+
+                    showError('오류가 발생했습니다', userError.message, '/');
+                    return;
+                }
+
+                if (!userData) {
+                    showError('사용자 정보를 찾을 수 없습니다', '관리자에게 문의해주세요.', '/');
+                    return;
+                }
+
+                // 3. 활성화 여부 확인
+                if (!userData.is_active) {
+                    showError(
+                        '계정이 비활성화되었습니다',
+                        '계정이 일시적으로 비활성화되었습니다. 관리자에게 문의해주세요.',
+                        '/'
+                    );
+                    return;
+                }
+
+                // 4. role에 따라 리다이렉트
+                const role = userData.role;
+                console.log('User role:', role);
+
+                let targetPage = '';
+
+                switch (role) {
+                    case 'customer':
+                        targetPage = '/core/mypage-company.html';
+                        break;
+                    case 'accountant':
+                        targetPage = '/core/mypage-accountant.html';
+                        break;
+                    case 'admin':
+                        targetPage = '/core/mypage-admin.html';
+                        break;
+                    case 'investor':
+                        targetPage = '/core/mypage-investor.html';
+                        break;
+                    case 'partner':
+                        targetPage = '/core/mypage-partner.html';
+                        break;
+                    case 'supporter':
+                        targetPage = '/core/mypage-supporter.html';
+                        break;
+                    default:
+                        showError('알 수 없는 사용자 역할입니다', '관리자에게 문의해주세요.', '/');
+                        return;
+                }
+
+                // 5. 리다이렉트
+                console.log('Redirecting to:', targetPage);
+                window.location.href = targetPage;
+
+            } catch (error) {
+                console.error('Route error:', error);
+                showError('오류가 발생했습니다', error.message, '/');
+            }
+        }
+
+        // 에러 화면 표시
+        function showError(title, message, redirectUrl) {
+            document.getElementById('loadingContainer').innerHTML = `
+                <div class="error-container">
+                    <div class="error-icon">⚠️</div>
+                    <h2 class="error-title">${title}</h2>
+                    <p class="error-message">${message}</p>
+                    <a href="${redirectUrl}" class="btn">
+                        ${redirectUrl === '/' ? '메인으로 돌아가기' : '이동하기'}
+                    </a>
+                </div>
+            `;
+        }
+
+        // 역할 한글명 반환
+        function getRoleKoreanName(role) {
+            const roleNames = {
+                'customer': '고객',
+                'accountant': '공인회계사',
+                'admin': '관리자',
+                'investor': '투자자',
+                'partner': '제휴자',
+                'supporter': '서포터'
+            };
+            return roleNames[role] || role;
+        }
+
+        // 페이지 로드 시 즉시 회사 마이페이지로 이동 (테스트용)
+        window.location.href = 'mypage-company.html';
+    </script>
+</body>
+</html>

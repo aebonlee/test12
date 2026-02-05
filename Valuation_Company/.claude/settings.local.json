@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(git push)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "WebFetch(domain:www.venturesquare.net)",
+      "WebFetch(domain:thevc.kr)",
+      "Bash(git push:*)",
+      "Bash(pip install:*)",
+      "Bash(tee:*)",
+      "Bash(ls:*)",
+      "Bash(gh run list:*)",
+      "Bash(python3:*)"
+    ]
+  }
+}

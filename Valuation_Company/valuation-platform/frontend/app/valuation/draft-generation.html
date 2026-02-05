@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>평가보고서 초안 작성 | ValueLink</title>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="../styles/mobile-optimize.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --deep-green: #166534;
+            --deep-blue: #1D4ED8;
+            --amber: #F59E0B;
+            --deep-blue-light: #3B82F6;
+            --deep-blue-pale: #DBEAFE;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6B7280;
+            --bg-light: #F3F4F6;
+            --white: #FFFFFF;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+            --border: #E5E7EB;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* HERO SECTION */
+        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 48px 40px; color: white; text-align: center; }
+        .hero-content { max-width: 1200px; margin: 0 auto; }
+        .hero-title { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        .hero-subtitle { font-size: 16px; opacity: 0.9; margin-bottom: 16px; }
+        .hero-badge { display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 6px 14px; border-radius: 20px; font-size: 13px; }
+
+        /* Main Layout - 2 columns */
+        .page-wrapper {
+            display: flex;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 40px;
+        }
+
+        .editor-area { flex: 7; min-width: 0; }
+        .side-panel { flex: 3; min-width: 280px; max-width: 360px; }
+
+        /* Tabs */
+        .tab-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            background: var(--white);
+            border-radius: 12px 12px 0 0;
+            padding: 12px 16px 0;
+            border: 1px solid var(--border);
+            border-bottom: none;
+        }
+
+        .tab-btn {
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover { background: var(--bg-light); color: var(--text-secondary); }
+        .tab-btn.active { color: var(--deep-blue); border-bottom-color: var(--deep-blue); background: var(--deep-blue-pale); }
+        .tab-btn.completed { color: var(--success); }
+        .tab-btn.completed::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--success); border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+        /* Editor Panel */
+        .editor-panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 0 0 12px 12px;
+            padding: 32px;
+        }
+
+        .section-header {
+            margin-bottom: 20px;
+        }
+
+        .section-title-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .section-hint {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            padding: 12px 16px;
+            background: #F0F9FF;
+            border-left: 3px solid var(--deep-blue-light);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            min-height: 400px;
+            padding: 20px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.2s;
+            margin-top: 16px;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+            border-color: var(--deep-blue-light);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .editor-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .completion-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .completion-check input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--success);
+            cursor: pointer;
+        }
+
+        .save-status {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .save-status.saving { color: var(--amber); }
+        .save-status.saved { color: var(--success); }
+        .save-status.error { color: var(--error); }
+
+        .char-count {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Side Panel */
+        .side-card {
+            background: var(--white);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .side-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Project Info */
+        .project-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #F3F4F6;
+        }
+
+        .project-info-row:last-child { border-bottom: none; }
+        .project-info-label { color: var(--text-muted); }
+        .project-info-value { font-weight: 600; color: var(--text-primary); }
+
+        /* Progress */
+        .progress-bar-wrapper {
+            width: 100%;
+            height: 10px;
+            background: var(--bg-light);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--deep-blue), var(--success));
+            border-radius: 5px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--deep-blue);
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        /* Section Checklist */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .checklist-item:hover { background: var(--bg-light); }
+        .checklist-item.active { background: var(--deep-blue-pale); color: var(--deep-blue); font-weight: 600; }
+        .checklist-item.completed { color: var(--success); }
+
+        .checklist-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+
+        .checklist-item.completed .checklist-icon {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .checklist-item.active .checklist-icon {
+            border-color: var(--deep-blue);
+        }
+
+        /* Submit Button */
+        .btn-submit-draft {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, var(--deep-blue) 0%, #7C3AED 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-submit-draft:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(29,78,216,0.3); }
+        .btn-submit-draft:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .submit-note {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--deep-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Footer */
+        footer {
+            background: #1E3A5F;
+            color: var(--white);
+            padding: 32px 40px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo { font-size: 18px; font-weight: 700; }
+        .footer-text { font-size: 13px; opacity: 0.7; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .page-wrapper { flex-direction: column; }
+            .side-panel { max-width: none; }
+        }
+
+        @media (max-width: 768px) {
+            .page-wrapper { padding: 20px; }
+            .hero-title { font-size: 24px; }
+            .editor-panel { padding: 20px; }
+            .editor-textarea { min-height: 300px; }
+            .tab-btn { font-size: 12px; padding: 6px 10px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 접근 권한 확인 -->
+    <div id="access-denied" style="display:none;">
+        <div style="text-align:center; padding:80px 20px; max-width:500px; margin:0 auto;">
+            <div style="font-size:48px; margin-bottom:20px;">🔒</div>
+            <h2 style="color:#1F2937; margin-bottom:12px;">접근 권한이 없습니다</h2>
+            <p style="color:#6B7280; margin-bottom:24px;">이 페이지는 담당 회계사 및 관리자만 접근할 수 있습니다.<br>현재 진행 상태는 사이드바에서 확인하실 수 있습니다.</p>
+            <a href="../valuation.html" style="display:inline-block; padding:12px 24px; background:#166534; color:white; border-radius:8px; text-decoration:none; font-weight:600;">메인으로 돌아가기</a>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            var role = localStorage.getItem('userRole') || 'customer';
+            if (role === 'accountant' || role === 'admin') return;
+            document.getElementById('access-denied').style.display = 'block';
+            document.addEventListener('DOMContentLoaded', function() {
+                var els = ['header-container', '.hero-section', '.page-wrapper', 'footer'];
+                ['header-container'].forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+                ['.hero-section', '.page-wrapper', 'footer'].forEach(function(sel) {
+                    var el = document.querySelector(sel);
+                    if (el) el.style.display = 'none';
+                });
+            });
+        })();
+    </script>
+
+    <!-- Header -->
+    <div id="header-container"></div>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">평가보고서 초안 작성</h1>
+            <p class="hero-subtitle">9개 섹션을 작성하여 평가보고서 초안을 완성합니다</p>
+            <div class="hero-badge">
+                <span>프로젝트 ID: </span>
+                <span id="hero-project-id">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p style="color: var(--text-muted);">프로젝트 정보를 불러오는 중...</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="page-wrapper" id="mainContent" style="display:none;">
+        <!-- Editor Area (70%) -->
+        <main class="editor-area">
+            <!-- Tab Bar -->
+            <div class="tab-bar" id="tabBar">
+                <!-- Tabs will be dynamically generated -->
+            </div>
+
+            <!-- Editor Panel -->
+            <div class="editor-panel">
+                <div class="section-header">
+                    <div class="section-title-text" id="sectionTitle">-</div>
+                    <div class="section-hint" id="sectionHint">-</div>
+                </div>
+
+                <textarea class="editor-textarea" id="editorTextarea" placeholder="이 섹션의 내용을 작성해주세요..."></textarea>
+
+                <div class="editor-footer">
+                    <label class="completion-check">
+                        <input type="checkbox" id="completionCheck">
+                        이 섹션 작성 완료
+                    </label>
+                    <div>
+                        <span class="char-count" id="charCount">0자</span>
+                        <span class="save-status" id="saveStatus"></span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Side Panel (30%) -->
+        <aside class="side-panel">
+            <!-- Project Info -->
+            <div class="side-card">
+                <div class="side-card-title">📋 프로젝트 정보</div>
+                <div class="project-info-row">
+                    <span class="project-info-label">기업명</span>
+                    <span class="project-info-value" id="infoCompany">-</span>
+                </div>
+                <div class="project-info-row">
+                    <span class="project-info-label">프로젝트 ID</span>
+                    <span class="project-info-value" id="infoProjectId" style="font-family:monospace; font-size:12px;">-</span>
+                </div>
+                <div class="project-info-row">
+                    <span class="project-info-label">평가 방법</span>
+                    <span class="project-info-value" id="infoMethod">-</span>
+                </div>
+                <div class="project-info-row">
+                    <span class="project-info-label">평가 기준일</span>
+                    <span class="project-info-value" id="infoBaseDate">-</span>
+                </div>
+                <div class="project-info-row">
+                    <span class="project-info-label">담당 회계사</span>
+                    <span class="project-info-value" id="infoAccountant">-</span>
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div class="side-card">
+                <div class="side-card-title">📊 작성 진행률</div>
+                <div class="progress-text" id="progressText">0 / 9 섹션 완료</div>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+                </div>
+
+                <div id="checklist">
+                    <!-- Checklist items will be generated -->
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="side-card">
+                <button class="btn-submit-draft" id="btnSubmitDraft" disabled onclick="submitDraft()">
+                    초안 제출
+                </button>
+                <div class="submit-note">9개 섹션 모두 완료 시 활성화됩니다</div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">ValueLink</div>
+            <div class="footer-text">&copy; 2026 ValueLink. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <!-- Header Load Script -->
+    <script>
+        fetch('../../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+                const scripts = document.getElementById('header-container').querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) { newScript.src = script.src; }
+                    else { newScript.textContent = script.textContent; }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+    </script>
+
+    <!-- Main Script -->
+    <script>
+        // ====== Supabase 초기화 ======
+        const SUPABASE_URL = 'https://arxrfetgaitkgiiqabap.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeHJmZXRnYWl0a2dpaXFhYmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNzIxNDMsImV4cCI6MjA2Mjk0ODE0M30.aGSJFVFW5P_E9l4sBz5_7MWJiN5YOhMJXBbLPi7bo0';
+        let supabaseClient = null;
+        try {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch(e) {
+            console.warn('Supabase 초기화 실패:', e);
+        }
+
+        // ====== 9개 섹션 정의 ======
+        const SECTIONS = [
+            { key: 'summary', title: 'I. 요약 (Executive Summary)', hint: '평가 결과의 핵심 요약을 작성합니다. 평가 방법, 주당 평가가치, 기업가치 등 핵심 결과를 간결하게 정리합니다.' },
+            { key: 'overview', title: 'II. 평가 개요', hint: '평가 목적, 평가 범위, 적용한 평가 방법론, 평가 기준일 등을 기술합니다.' },
+            { key: 'company', title: 'III. 회사 개요 및 산업 분석', hint: '대상 기업 소개(설립일, 업종, 주요 사업 등)와 해당 산업의 동향 및 전망을 분석합니다.' },
+            { key: 'financial', title: 'IV. 재무 분석', hint: '과거 3개년 재무제표 분석, 수익성/안정성/성장성 지표, 재무 건전성 평가를 작성합니다.' },
+            { key: 'methodology', title: 'V. 평가 방법론 및 가정', hint: '적용한 평가 방법론의 상세 설명, 주요 가정 사항(할인율, 성장률, 배수 등)을 기술합니다.' },
+            { key: 'results', title: 'VI. 평가 결과', hint: '산출된 기업가치와 주당 평가가치를 상세 산출 과정과 함께 제시합니다.' },
+            { key: 'sensitivity', title: 'VII. 민감도 분석', hint: '주요 변수(할인율, 성장률 등) 변동에 따른 기업가치 변화를 분석합니다.' },
+            { key: 'conclusion', title: 'VIII. 결론', hint: '최종 평가 의견, 평가 결과의 의미, 제한사항 및 면책 조항을 작성합니다.' },
+            { key: 'appendix', title: 'IX. 부록', hint: '참고자료, 재무제표 원본, 가정 근거 자료, 면책사항 등을 첨부합니다.' }
+        ];
+
+        const METHOD_NAMES = {
+            dcf: 'DCF평가법',
+            relative: '상대가치평가법',
+            intrinsic: '본질가치평가법',
+            asset: '자산가치평가법',
+            inheritance_tax: '상증세법평가법'
+        };
+
+        // ====== 상태 관리 ======
+        let currentSectionIndex = 0;
+        let sectionData = {}; // { key: { content, is_completed } }
+        let saveTimer = null;
+        let projectId = null;
+        let method = null;
+
+        // ====== 초기화 ======
+        async function initializePage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            projectId = urlParams.get('id') || urlParams.get('projectId');
+            method = urlParams.get('method');
+
+            if (!projectId || !method) {
+                alert('프로젝트 ID와 평가 방법이 필요합니다. URL 파라미터를 확인해주세요.');
+                return;
+            }
+
+            document.getElementById('hero-project-id').textContent = projectId;
+
+            // 프로젝트 정보 로드
+            await loadProjectInfo();
+
+            // 섹션 데이터 로드
+            await loadSections();
+
+            // UI 구성
+            renderTabs();
+            renderChecklist();
+            selectSection(0);
+            updateProgress();
+
+            // 로딩 숨김
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'flex';
+        }
+
+        // ====== 프로젝트 정보 로드 ======
+        async function loadProjectInfo() {
+            try {
+                if (!supabaseClient) throw new Error('No Supabase');
+
+                const { data: project, error } = await supabaseClient
+                    .from('projects')
+                    .select('company_name, project_id, valuation_date, accountant_name')
+                    .eq('project_id', projectId)
+                    .single();
+
+                if (!error && project) {
+                    document.getElementById('infoCompany').textContent = project.company_name || '-';
+                    document.getElementById('infoProjectId').textContent = project.project_id;
+                    document.getElementById('infoMethod').textContent = METHOD_NAMES[method] || method;
+                    document.getElementById('infoBaseDate').textContent = project.valuation_date || '-';
+                    document.getElementById('infoAccountant').textContent = project.accountant_name || '-';
+                    return;
+                }
+            } catch(e) {
+                console.warn('프로젝트 DB 조회 실패, 기본값 사용:', e);
+            }
+
+            // Fallback (DB 조회 실패 시 기본값)
+            document.getElementById('infoCompany').textContent = '-';
+            document.getElementById('infoProjectId').textContent = projectId;
+            document.getElementById('infoMethod').textContent = METHOD_NAMES[method] || method;
+            document.getElementById('infoBaseDate').textContent = '-';
+            document.getElementById('infoAccountant').textContent = '-';
+        }
+
+        // ====== 섹션 데이터 로드 ======
+        async function loadSections() {
+            // 초기화
+            SECTIONS.forEach(s => {
+                sectionData[s.key] = { content: '', is_completed: false };
+            });
+
+            try {
+                if (!supabaseClient) return;
+
+                const { data, error } = await supabaseClient
+                    .from('report_draft_sections')
+                    .select('section_key, content, is_completed')
+                    .eq('project_id', projectId)
+                    .eq('method', method);
+
+                if (!error && data) {
+                    data.forEach(row => {
+                        if (sectionData[row.section_key] !== undefined) {
+                            sectionData[row.section_key] = {
+                                content: row.content || '',
+                                is_completed: row.is_completed || false
+                            };
+                        }
+                    });
+                }
+
+                // draft_method_status를 in_progress로 업데이트
+                await supabaseClient
+                    .from('draft_method_status')
+                    .upsert({
+                        project_id: projectId,
+                        method: method,
+                        draft_status: 'in_progress',
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'project_id,method' });
+
+            } catch(e) {
+                console.warn('섹션 데이터 로드 실패:', e);
+            }
+        }
+
+        // ====== 탭 렌더링 ======
+        function renderTabs() {
+            const tabBar = document.getElementById('tabBar');
+            tabBar.innerHTML = SECTIONS.map((s, i) => {
+                const completedClass = sectionData[s.key].is_completed ? 'completed' : '';
+                const shortTitle = s.title.split('. ')[1] || s.title;
+                // 로마자 + 축약명
+                const romanNum = s.title.split('.')[0];
+                return `<button class="tab-btn ${completedClass}" data-index="${i}" onclick="selectSection(${i})">${romanNum}. ${shortTitle.split(' (')[0].substring(0, 6)}</button>`;
+            }).join('');
+        }
+
+        // ====== 체크리스트 렌더링 ======
+        function renderChecklist() {
+            const checklist = document.getElementById('checklist');
+            checklist.innerHTML = SECTIONS.map((s, i) => {
+                const data = sectionData[s.key];
+                const completedClass = data.is_completed ? 'completed' : '';
+                const shortTitle = s.title.replace(/^[IVX]+\.\s*/, '').split(' (')[0];
+                return `<div class="checklist-item ${completedClass}" data-index="${i}" onclick="selectSection(${i})">
+                    <div class="checklist-icon">${data.is_completed ? '&#10003;' : ''}</div>
+                    <span>${shortTitle}</span>
+                </div>`;
+            }).join('');
+        }
+
+        // ====== 섹션 선택 ======
+        function selectSection(index) {
+            // 현재 내용 저장 (변경된 경우)
+            if (currentSectionIndex !== index) {
+                saveSectionImmediate(currentSectionIndex);
+            }
+
+            currentSectionIndex = index;
+            const section = SECTIONS[index];
+            const data = sectionData[section.key];
+
+            // UI 업데이트
+            document.getElementById('sectionTitle').textContent = section.title;
+            document.getElementById('sectionHint').textContent = section.hint;
+            document.getElementById('editorTextarea').value = data.content;
+            document.getElementById('completionCheck').checked = data.is_completed;
+            document.getElementById('charCount').textContent = `${data.content.length}자`;
+            document.getElementById('saveStatus').textContent = '';
+            document.getElementById('saveStatus').className = 'save-status';
+
+            // 탭 활성화
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+
+            // 체크리스트 활성화
+            document.querySelectorAll('.checklist-item').forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+        }
+
+        // ====== 자동 저장 (2초 디바운스) ======
+        document.getElementById('editorTextarea').addEventListener('input', function() {
+            const section = SECTIONS[currentSectionIndex];
+            sectionData[section.key].content = this.value;
+
+            // 글자 수 업데이트
+            document.getElementById('charCount').textContent = `${this.value.length}자`;
+
+            // 저장 상태 표시
+            const statusEl = document.getElementById('saveStatus');
+            statusEl.textContent = '저장 대기 중...';
+            statusEl.className = 'save-status saving';
+
+            // 디바운스
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => {
+                saveSectionToDb(section.key);
+            }, 2000);
+        });
+
+        // ====== 완료 체크박스 ======
+        document.getElementById('completionCheck').addEventListener('change', function() {
+            const section = SECTIONS[currentSectionIndex];
+            sectionData[section.key].is_completed = this.checked;
+
+            // 즉시 저장
+            saveSectionToDb(section.key);
+
+            // UI 업데이트
+            renderTabs();
+            renderChecklist();
+            updateProgress();
+
+            // 탭/체크리스트 활성 상태 복원
+            document.querySelectorAll('.tab-btn')[currentSectionIndex].classList.add('active');
+            document.querySelectorAll('.checklist-item')[currentSectionIndex].classList.add('active');
+        });
+
+        // ====== DB 저장 ======
+        async function saveSectionToDb(sectionKey) {
+            const statusEl = document.getElementById('saveStatus');
+
+            try {
+                if (!supabaseClient) {
+                    statusEl.textContent = '오프라인 모드';
+                    statusEl.className = 'save-status';
+                    return;
+                }
+
+                const data = sectionData[sectionKey];
+                const sectionDef = SECTIONS.find(s => s.key === sectionKey);
+                const userEmail = localStorage.getItem('userEmail') || 'accountant';
+
+                const { error } = await supabaseClient
+                    .from('report_draft_sections')
+                    .upsert({
+                        project_id: projectId,
+                        method: method,
+                        section_key: sectionKey,
+                        section_title: sectionDef.title,
+                        content: data.content,
+                        is_completed: data.is_completed,
+                        updated_by: userEmail,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'project_id,method,section_key' });
+
+                if (error) throw error;
+
+                statusEl.textContent = '저장 완료';
+                statusEl.className = 'save-status saved';
+
+            } catch(e) {
+                console.error('저장 실패:', e);
+                statusEl.textContent = '저장 실패';
+                statusEl.className = 'save-status error';
+            }
+        }
+
+        function saveSectionImmediate(index) {
+            const section = SECTIONS[index];
+            if (section) {
+                clearTimeout(saveTimer);
+                saveSectionToDb(section.key);
+            }
+        }
+
+        // ====== 진행률 업데이트 ======
+        function updateProgress() {
+            const completed = SECTIONS.filter(s => sectionData[s.key].is_completed).length;
+            const total = SECTIONS.length;
+            const pct = Math.round((completed / total) * 100);
+
+            document.getElementById('progressText').textContent = `${completed} / ${total} 섹션 완료`;
+            document.getElementById('progressBar').style.width = `${pct}%`;
+
+            // 제출 버튼 활성화
+            const btn = document.getElementById('btnSubmitDraft');
+            btn.disabled = (completed < total);
+            if (completed >= total) {
+                document.querySelector('.submit-note').textContent = '모든 섹션이 완료되었습니다. 초안을 제출하세요.';
+            }
+        }
+
+        // ====== 초안 제출 ======
+        async function submitDraft() {
+            const completed = SECTIONS.filter(s => sectionData[s.key].is_completed).length;
+            if (completed < SECTIONS.length) {
+                alert('모든 섹션을 완료해야 초안을 제출할 수 있습니다.');
+                return;
+            }
+
+            if (!confirm('평가보고서 초안을 제출하시겠습니까?\n\n제출 후 고객이 초안을 검토하게 됩니다.')) {
+                return;
+            }
+
+            try {
+                // 마지막 섹션 저장
+                saveSectionImmediate(currentSectionIndex);
+
+                if (supabaseClient) {
+                    const { error } = await supabaseClient
+                        .from('draft_method_status')
+                        .upsert({
+                            project_id: projectId,
+                            method: method,
+                            draft_status: 'submitted',
+                            draft_submitted_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        }, { onConflict: 'project_id,method' });
+
+                    if (error) throw error;
+                }
+
+                alert('초안이 제출되었습니다.\n고객에게 검토 알림이 전송됩니다.');
+
+                // 초안 확인 페이지로 이동
+                window.location.href = `report-draft.html?projectId=${projectId}&method=${method}`;
+
+            } catch(e) {
+                console.error('초안 제출 실패:', e);
+                alert('초안 제출에 실패했습니다. 다시 시도해주세요.');
+            }
+        }
+
+        // ====== 페이지 로드 ======
+        initializePage();
+    </script>
+</body>
+</html>

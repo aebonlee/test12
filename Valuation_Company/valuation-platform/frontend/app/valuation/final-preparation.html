@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>평가보고서 최종안 작성 | ValueLink</title>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="../styles/mobile-optimize.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --deep-blue: #1D4ED8;
+            --deep-green: #166534;
+            --amber: #F59E0B;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6B7280;
+            --white: #FFFFFF;
+            --bg-light: #F3F4F6;
+            --border: #E5E7EB;
+            --light-blue: #EFF6FF;
+            --accent-blue: #3B82F6;
+            --success: #10B981;
+            --error: #EF4444;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Main Layout */
+        .page-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .page-header { margin-bottom: 32px; }
+        .page-title { font-size: 32px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+        .page-description { font-size: 16px; color: var(--text-secondary); line-height: 1.6; }
+
+        /* Card */
+        .card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Project Info */
+        .project-meta {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .meta-item { text-align: center; }
+        .meta-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+        .meta-value { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+
+        /* Revision Requests */
+        .revision-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .revision-count {
+            background: #FEF3C7;
+            color: #92400E;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .revision-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .revision-item {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-light);
+            border-radius: 12px;
+            border-left: 4px solid var(--amber);
+        }
+
+        .revision-number {
+            width: 28px; height: 28px;
+            background: var(--amber);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .revision-content { flex: 1; }
+        .revision-section-label { font-size: 11px; color: var(--accent-blue); font-weight: 600; margin-bottom: 2px; }
+        .revision-type { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+        .revision-detail { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+        .revision-empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 14px; }
+
+        /* Section Editor */
+        .editor-section { margin-top: 8px; }
+
+        .editor-tabs {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .editor-tab {
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .editor-tab:hover { color: var(--text-primary); }
+        .editor-tab.active {
+            color: var(--deep-blue);
+            border-bottom-color: var(--deep-blue);
+        }
+
+        .editor-tab .tab-check {
+            display: inline-block;
+            margin-left: 4px;
+            color: var(--success);
+            font-size: 12px;
+        }
+
+        .editor-content { display: none; }
+        .editor-content.active { display: block; }
+
+        .editor-hint {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            min-height: 250px;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+            border-color: var(--deep-blue);
+        }
+
+        .editor-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .save-indicator { display: flex; align-items: center; gap: 4px; }
+        .save-indicator.saved { color: var(--success); }
+        .save-indicator.saving { color: var(--amber); }
+
+        /* PDF Upload */
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 48px 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg-light);
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--deep-blue);
+            background: var(--light-blue);
+        }
+
+        .upload-icon { font-size: 48px; margin-bottom: 16px; }
+        .upload-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+        .upload-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
+
+        .upload-btn {
+            display: inline-block;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            background: var(--deep-blue);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .upload-btn:hover { background: #1E40AF; }
+
+        .uploaded-file {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: #F0FDF4;
+            border: 2px solid var(--success);
+            border-radius: 12px;
+            margin-top: 16px;
+        }
+
+        .uploaded-file-icon { font-size: 32px; }
+        .uploaded-file-info { flex: 1; }
+        .uploaded-file-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+        .uploaded-file-size { font-size: 13px; color: var(--text-muted); }
+
+        .uploaded-file-remove {
+            padding: 8px 16px;
+            font-size: 13px;
+            color: var(--error);
+            background: white;
+            border: 1px solid var(--error);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Submit Button */
+        .submit-area {
+            margin-top: 32px;
+            text-align: center;
+        }
+
+        .btn-submit {
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            background: var(--deep-green);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: #15803D;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(22, 101, 52, 0.3);
+        }
+
+        .btn-submit:disabled {
+            background: #9CA3AF;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .submit-help {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 12px;
+        }
+
+        /* Status Messages */
+        .status-message {
+            text-align: center;
+            padding: 60px 40px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+
+        .status-message .icon { font-size: 64px; margin-bottom: 24px; }
+        .status-message h2 { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+        .status-message p { font-size: 16px; color: var(--text-secondary); line-height: 1.6; }
+
+        /* Loading */
+        .loading { text-align: center; padding: 60px 20px; }
+        .loading-spinner {
+            width: 48px; height: 48px;
+            border: 4px solid #E5E7EB;
+            border-top-color: var(--deep-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .project-meta { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .page-wrapper { padding: 20px; }
+            .page-title { font-size: 24px; }
+            .card { padding: 20px; }
+            .project-meta { grid-template-columns: 1fr; }
+            .editor-tabs { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 접근 권한 확인 -->
+    <div id="access-denied" style="display:none;">
+        <div style="text-align:center; padding:80px 20px; max-width:500px; margin:0 auto;">
+            <div style="font-size:48px; margin-bottom:20px;">&#128274;</div>
+            <h2 style="color:#1F2937; margin-bottom:12px;">접근 권한이 없습니다</h2>
+            <p style="color:#6B7280; margin-bottom:24px;">이 페이지는 담당 회계사 및 관리자만 접근할 수 있습니다.</p>
+            <a href="../valuation.html" style="display:inline-block; padding:12px 24px; background:#166534; color:white; border-radius:8px; text-decoration:none; font-weight:600;">메인으로 돌아가기</a>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            var role = localStorage.getItem('userRole') || 'customer';
+            if (role === 'accountant' || role === 'admin') return;
+            document.getElementById('access-denied').style.display = 'block';
+            document.addEventListener('DOMContentLoaded', function() {
+                var els = document.querySelectorAll('#header-container, .page-wrapper, footer');
+                els.forEach(function(el) { if (el) el.style.display = 'none'; });
+            });
+        })();
+    </script>
+
+    <!-- Header -->
+    <div id="header-container"></div>
+
+    <!-- Main Content -->
+    <div class="page-wrapper">
+        <!-- Loading -->
+        <div id="loadingState" class="loading">
+            <div class="loading-spinner"></div>
+            <p style="color: var(--text-muted);">페이지를 불러오는 중...</p>
+        </div>
+
+        <!-- Already Finalized -->
+        <div id="finalizedState" style="display: none;">
+            <div class="status-message">
+                <div class="icon">&#9989;</div>
+                <h2>최종 보고서가 이미 완료되었습니다</h2>
+                <p>최종 보고서가 업로드되었습니다. 고객에게 전달되었습니다.</p>
+                <div style="margin-top: 24px;">
+                    <a href="../dashboard.html" style="display: inline-block; padding: 12px 28px; background: #1D4ED8; color: white; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px;">대시보드로 이동</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Editor Area -->
+        <div id="mainContent" style="display: none;">
+            <div class="page-header">
+                <h1 class="page-title">평가보고서 최종안 작성</h1>
+                <p class="page-description">고객의 수정 요청을 반영하여 최종 보고서를 완성하고, PDF를 업로드하세요.</p>
+            </div>
+
+            <!-- Project Info -->
+            <div class="card">
+                <div class="project-meta">
+                    <div class="meta-item">
+                        <div class="meta-label">프로젝트 ID</div>
+                        <div class="meta-value" id="display-project-id">-</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">기업명</div>
+                        <div class="meta-value" id="display-company">-</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">평가방법</div>
+                        <div class="meta-value" id="display-method">-</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">초안 상태</div>
+                        <div class="meta-value" id="display-status">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revision Requests from DB -->
+            <div class="card">
+                <div class="revision-header">
+                    <h3 class="card-title">&#128221; 고객 수정 요청 사항</h3>
+                    <span class="revision-count" id="revision-count">0개</span>
+                </div>
+                <div class="revision-list" id="revision-list">
+                    <div class="revision-empty">수정 요청이 없습니다. 초안을 바로 최종안으로 완성하세요.</div>
+                </div>
+            </div>
+
+            <!-- Section Editor -->
+            <div class="card">
+                <h3 class="card-title">&#9999;&#65039; 보고서 섹션 편집</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+                    수정 요청 사항을 반영하여 각 섹션을 편집하세요. 변경 사항은 자동 저장됩니다.
+                </p>
+
+                <div class="editor-section">
+                    <div class="editor-tabs" id="editorTabs"></div>
+                    <div id="editorPanels"></div>
+                </div>
+            </div>
+
+            <!-- PDF Upload -->
+            <div class="card">
+                <h3 class="card-title">&#128196; 최종 보고서 PDF 업로드</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+                    최종 완성된 평가보고서 PDF 파일을 업로드하세요. 이 파일이 고객에게 전달됩니다.
+                </p>
+
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">&#128206;</div>
+                    <div class="upload-title">PDF 파일을 드래그하거나 클릭하여 업로드</div>
+                    <div class="upload-subtitle">PDF 형식, 최대 50MB</div>
+                    <button class="upload-btn" type="button">파일 선택</button>
+                    <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+                </div>
+
+                <div id="uploadedFileInfo" style="display: none;"></div>
+            </div>
+
+            <!-- Submit -->
+            <div class="submit-area">
+                <button class="btn-submit" id="btnFinalize" disabled>최종안 완료 및 제출</button>
+                <p class="submit-help">PDF를 업로드하면 제출 버튼이 활성화됩니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Load Script -->
+    <script>
+        fetch('../../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+                const scripts = document.getElementById('header-container').querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) { newScript.src = script.src; }
+                    else { newScript.textContent = script.textContent; }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+    </script>
+
+    <!-- Page Script -->
+    <script>
+        // ====== Supabase ======
+        const SUPABASE_URL = 'https://arxrfetgaitkgiiqabap.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeHJmZXRnYWl0a2dpaXFhYmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNzIxNDMsImV4cCI6MjA2Mjk0ODE0M30.aGSJFVFW5P_E9l4sBz5_7MWJiN5YOhMJXBbLPi7bo0';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const METHOD_NAMES = {
+            dcf: 'DCF평가법',
+            relative: '상대가치평가법',
+            intrinsic: '본질가치평가법',
+            asset: '자산가치평가법',
+            inheritance_tax: '상증세법평가법'
+        };
+
+        const SECTIONS = [
+            { key: 'summary', title: 'I. 요약', hint: '평가 결과의 핵심 요약을 작성하세요.' },
+            { key: 'overview', title: 'II. 평가 개요', hint: '평가 목적, 범위, 기준일 등을 기술하세요.' },
+            { key: 'company', title: 'III. 회사 개요', hint: '대상 기업 소개 및 산업 분석을 작성하세요.' },
+            { key: 'financial', title: 'IV. 재무 분석', hint: '재무제표 분석 내용을 작성하세요.' },
+            { key: 'methodology', title: 'V. 평가 방법론', hint: '적용 방법론과 가정을 설명하세요.' },
+            { key: 'results', title: 'VI. 평가 결과', hint: '산출된 기업가치와 과정을 기술하세요.' },
+            { key: 'sensitivity', title: 'VII. 민감도', hint: '주요 변수 변동 영향을 분석하세요.' },
+            { key: 'conclusion', title: 'VIII. 결론', hint: '최종 의견 및 결론을 작성하세요.' },
+            { key: 'appendix', title: 'IX. 부록', hint: '참고자료, 전제사항 등을 기재하세요.' }
+        ];
+
+        // ====== State ======
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('id') || urlParams.get('projectId');
+        const method = urlParams.get('method');
+        let sectionData = {};
+        let saveTimers = {};
+        let uploadedFilePath = null;
+
+        // ====== Show State ======
+        function showState(id) {
+            ['loadingState', 'finalizedState', 'mainContent'].forEach(s => {
+                document.getElementById(s).style.display = 'none';
+            });
+            document.getElementById(id).style.display = 'block';
+        }
+
+        // ====== Initialize ======
+        async function initializePage() {
+            if (!projectId || !method) {
+                showState('finalizedState');
+                document.querySelector('#finalizedState h2').textContent = '잘못된 접근';
+                document.querySelector('#finalizedState p').textContent = '프로젝트 ID 또는 평가법 정보가 없습니다.';
+                return;
+            }
+
+            try {
+                // 1. Load project info
+                const { data: project, error: projErr } = await supabase
+                    .from('projects')
+                    .select('project_id, company_name')
+                    .eq('project_id', projectId)
+                    .single();
+
+                if (projErr) {
+                    console.error('프로젝트 조회 오류:', projErr);
+                    showState('finalizedState');
+                    document.querySelector('#finalizedState h2').textContent = '프로젝트를 찾을 수 없습니다';
+                    return;
+                }
+
+                // draft_method_status에서 방법별 상태 확인
+                const { data: methodStatus } = await supabase
+                    .from('draft_method_status')
+                    .select('draft_status, draft_submitted_at, final_report_url')
+                    .eq('project_id', projectId)
+                    .eq('method', method)
+                    .maybeSingle();
+                const draftStatus = methodStatus ? methodStatus.draft_status : 'not_started';
+
+                // Already finalized
+                if (draftStatus === 'finalized') {
+                    showState('finalizedState');
+                    return;
+                }
+
+                // Display project info
+                document.getElementById('display-project-id').textContent = projectId;
+                document.getElementById('display-company').textContent = project.company_name || '-';
+                document.getElementById('display-method').textContent = METHOD_NAMES[method] || method;
+                document.getElementById('display-status').textContent = draftStatus || '-';
+
+                // 2. Load revision requests
+                await loadRevisionRequests();
+
+                // 3. Load sections for editing
+                await loadSections();
+
+                // 4. Setup editor
+                renderEditor();
+
+                // 5. Setup upload
+                setupUpload();
+
+                // 6. Setup submit
+                setupSubmit();
+
+                showState('mainContent');
+
+            } catch (err) {
+                console.error('초기화 오류:', err);
+                showState('finalizedState');
+                document.querySelector('#finalizedState h2').textContent = '오류 발생';
+                document.querySelector('#finalizedState p').textContent = err.message;
+            }
+        }
+
+        // ====== Load Revision Requests ======
+        async function loadRevisionRequests() {
+            const { data: revisions, error } = await supabase
+                .from('revision_requests')
+                .select('*')
+                .eq('project_id', projectId)
+                .eq('method', method)
+                .order('created_at', { ascending: false });
+
+            const listEl = document.getElementById('revision-list');
+            const countEl = document.getElementById('revision-count');
+
+            if (error || !revisions || revisions.length === 0) {
+                countEl.textContent = '0개';
+                listEl.innerHTML = '<div class="revision-empty">수정 요청이 없습니다.</div>';
+                return;
+            }
+
+            countEl.textContent = `${revisions.length}개`;
+            listEl.innerHTML = revisions.map((r, i) => `
+                <div class="revision-item">
+                    <div class="revision-number">${i + 1}</div>
+                    <div class="revision-content">
+                        ${r.section ? `<div class="revision-section-label">${r.section}</div>` : ''}
+                        <div class="revision-type">${r.request_type || '수정 요청'}</div>
+                        <div class="revision-detail">${r.request_detail || ''}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ====== Load Sections ======
+        async function loadSections() {
+            const { data: sections, error } = await supabase
+                .from('report_draft_sections')
+                .select('*')
+                .eq('project_id', projectId)
+                .eq('method', method);
+
+            sectionData = {};
+            (sections || []).forEach(s => {
+                sectionData[s.section_key] = s;
+            });
+        }
+
+        // ====== Render Editor ======
+        function renderEditor() {
+            const tabsEl = document.getElementById('editorTabs');
+            const panelsEl = document.getElementById('editorPanels');
+
+            // Tabs
+            tabsEl.innerHTML = SECTIONS.map((sec, i) => {
+                const data = sectionData[sec.key];
+                const completed = data && data.is_completed;
+                return `<button class="editor-tab${i === 0 ? ' active' : ''}" data-index="${i}">
+                    ${sec.title}${completed ? '<span class="tab-check">&#10003;</span>' : ''}
+                </button>`;
+            }).join('');
+
+            // Panels
+            panelsEl.innerHTML = SECTIONS.map((sec, i) => {
+                const data = sectionData[sec.key];
+                const content = data ? data.content || '' : '';
+                return `<div class="editor-content${i === 0 ? ' active' : ''}" data-index="${i}">
+                    <div class="editor-hint">${sec.hint}</div>
+                    <textarea class="editor-textarea" data-key="${sec.key}" placeholder="${sec.hint}">${content}</textarea>
+                    <div class="editor-status">
+                        <span class="save-indicator" id="save-${sec.key}">&#8212;</span>
+                        <span>${content.length}자</span>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Tab click
+            tabsEl.querySelectorAll('.editor-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const idx = tab.dataset.index;
+                    tabsEl.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+                    panelsEl.querySelectorAll('.editor-content').forEach(p => p.classList.remove('active'));
+                    tab.classList.add('active');
+                    panelsEl.querySelector(`.editor-content[data-index="${idx}"]`).classList.add('active');
+                });
+            });
+
+            // Auto-save on input
+            panelsEl.querySelectorAll('.editor-textarea').forEach(textarea => {
+                textarea.addEventListener('input', () => {
+                    const key = textarea.dataset.key;
+                    const indicator = document.getElementById('save-' + key);
+                    indicator.textContent = '저장 중...';
+                    indicator.className = 'save-indicator saving';
+
+                    // Update char count
+                    const statusEl = textarea.parentElement.querySelector('.editor-status span:last-child');
+                    statusEl.textContent = textarea.value.length + '자';
+
+                    clearTimeout(saveTimers[key]);
+                    saveTimers[key] = setTimeout(() => saveSectionToDb(key, textarea.value), 2000);
+                });
+            });
+        }
+
+        // ====== Save Section ======
+        async function saveSectionToDb(sectionKey, content) {
+            const indicator = document.getElementById('save-' + sectionKey);
+            try {
+                const sec = SECTIONS.find(s => s.key === sectionKey);
+                const { error } = await supabase
+                    .from('report_draft_sections')
+                    .upsert({
+                        project_id: projectId,
+                        method: method,
+                        section_key: sectionKey,
+                        section_title: sec ? sec.title : sectionKey,
+                        content: content,
+                        updated_by: localStorage.getItem('userEmail') || 'accountant',
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'project_id,method,section_key' });
+
+                if (error) throw error;
+
+                indicator.innerHTML = '&#10003; 저장됨';
+                indicator.className = 'save-indicator saved';
+            } catch (err) {
+                console.error('저장 오류:', err);
+                indicator.textContent = '저장 실패';
+                indicator.className = 'save-indicator';
+                indicator.style.color = 'var(--error)';
+            }
+        }
+
+        // ====== Setup Upload ======
+        function setupUpload() {
+            const area = document.getElementById('uploadArea');
+            const input = document.getElementById('fileInput');
+
+            area.addEventListener('click', () => input.click());
+
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragover');
+            });
+
+            area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file) handleFile(file);
+            });
+
+            input.addEventListener('change', () => {
+                if (input.files[0]) handleFile(input.files[0]);
+            });
+        }
+
+        async function handleFile(file) {
+            if (!file.name.endsWith('.pdf')) {
+                alert('PDF 파일만 업로드할 수 있습니다.');
+                return;
+            }
+
+            if (file.size > 50 * 1024 * 1024) {
+                alert('파일 크기는 50MB를 초과할 수 없습니다.');
+                return;
+            }
+
+            const area = document.getElementById('uploadArea');
+            const infoEl = document.getElementById('uploadedFileInfo');
+
+            // Show uploading state
+            area.innerHTML = `
+                <div class="upload-icon">&#8987;</div>
+                <div class="upload-title">업로드 중...</div>
+                <div class="upload-subtitle">${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</div>
+            `;
+
+            try {
+                const storagePath = `reports/${method}/${projectId}.pdf`;
+                const { data, error } = await supabase.storage
+                    .from('valuation-reports')
+                    .upload(storagePath, file, { upsert: true });
+
+                if (error) throw error;
+
+                uploadedFilePath = storagePath;
+
+                // Show uploaded state
+                area.style.display = 'none';
+                infoEl.style.display = 'block';
+                infoEl.innerHTML = `
+                    <div class="uploaded-file">
+                        <div class="uploaded-file-icon">&#128196;</div>
+                        <div class="uploaded-file-info">
+                            <div class="uploaded-file-name">${file.name}</div>
+                            <div class="uploaded-file-size">${(file.size / 1024 / 1024).toFixed(2)} MB - 업로드 완료</div>
+                        </div>
+                        <button class="uploaded-file-remove" onclick="removeUploadedFile()">제거</button>
+                    </div>
+                `;
+
+                // Enable submit button
+                document.getElementById('btnFinalize').disabled = false;
+
+            } catch (err) {
+                console.error('업로드 오류:', err);
+                alert('파일 업로드에 실패했습니다: ' + err.message);
+                // Restore upload area
+                area.innerHTML = `
+                    <div class="upload-icon">&#128206;</div>
+                    <div class="upload-title">PDF 파일을 드래그하거나 클릭하여 업로드</div>
+                    <div class="upload-subtitle">PDF 형식, 최대 50MB</div>
+                    <button class="upload-btn" type="button">파일 선택</button>
+                `;
+            }
+        }
+
+        window.removeUploadedFile = function() {
+            uploadedFilePath = null;
+            const area = document.getElementById('uploadArea');
+            const infoEl = document.getElementById('uploadedFileInfo');
+            area.style.display = '';
+            area.innerHTML = `
+                <div class="upload-icon">&#128206;</div>
+                <div class="upload-title">PDF 파일을 드래그하거나 클릭하여 업로드</div>
+                <div class="upload-subtitle">PDF 형식, 최대 50MB</div>
+                <button class="upload-btn" type="button">파일 선택</button>
+                <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+            `;
+            infoEl.style.display = 'none';
+            document.getElementById('btnFinalize').disabled = true;
+            // Re-setup events
+            setupUpload();
+        };
+
+        // ====== Setup Submit ======
+        function setupSubmit() {
+            document.getElementById('btnFinalize').addEventListener('click', async () => {
+                if (!uploadedFilePath) {
+                    alert('PDF 파일을 먼저 업로드하세요.');
+                    return;
+                }
+
+                if (!confirm('최종 보고서를 제출하시겠습니까?\n\n제출 후 고객에게 최종 보고서가 전달됩니다.')) {
+                    return;
+                }
+
+                const btn = document.getElementById('btnFinalize');
+                btn.disabled = true;
+                btn.textContent = '처리 중...';
+
+                try {
+                    const { error } = await supabase
+                        .from('draft_method_status')
+                        .upsert({
+                            project_id: projectId,
+                            method: method,
+                            draft_status: 'finalized',
+                            final_report_url: uploadedFilePath,
+                            updated_at: new Date().toISOString()
+                        }, { onConflict: 'project_id,method' });
+
+                    if (error) throw error;
+
+                    alert('최종 보고서가 제출되었습니다.\n고객에게 전달됩니다.');
+                    showState('finalizedState');
+                    document.querySelector('#finalizedState h2').textContent = '최종 보고서 제출 완료';
+                    document.querySelector('#finalizedState p').textContent = '고객이 최종 보고서를 확인한 후 잔금 결제가 진행됩니다.';
+
+                } catch (err) {
+                    console.error('제출 오류:', err);
+                    alert('제출 중 오류가 발생했습니다: ' + err.message);
+                    btn.disabled = false;
+                    btn.textContent = '최종안 완료 및 제출';
+                }
+            });
+        }
+
+        // ====== Start ======
+        initializePage();
+    </script>
+</body>
+</html>

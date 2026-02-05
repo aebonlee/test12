@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회계사 마이페이지 | ValueLink</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="../styles/mobile-optimize.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --deep-blue: #1D4ED8;
+            --deep-green: #166534;
+            --amber: #F59E0B;
+            --red: #DC2626;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6B7280;
+            --bg-light: #F9FAFB;
+            --white: #FFFFFF;
+            --border: #E5E7EB;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        /* 프로필 카드 */
+        .profile-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            font-weight: 700;
+        }
+
+        .profile-info h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .profile-info p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .profile-badge {
+            margin-left: auto;
+            padding: 8px 16px;
+            background: #DCFCE7;
+            color: #059669;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 20px;
+        }
+
+        /* 통계 카드 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--deep-green);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* 섹션 */
+        .section {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .section-count {
+            padding: 4px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 20px;
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        /* 테이블 */
+        .project-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .project-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .project-table td {
+            padding: 16px;
+            font-size: 14px;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .project-table tbody tr:hover {
+            background: #F3F4F6;
+        }
+
+        .col-no {
+            width: 60px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* 회사명 */
+        .company-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* 평가방법 뱃지 */
+        .method-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            background: #DBEAFE;
+            color: var(--deep-blue);
+        }
+
+        /* 상태 뱃지 */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+        }
+
+        .status-badge.waiting {
+            background: #E0E7FF;
+            color: #3730A3;
+        }
+
+        .status-badge.in-progress {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .status-badge.document-requested {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .status-badge.document-submitted {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        /* 버튼 */
+        .btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--deep-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #047857;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--deep-green);
+            border: 1px solid var(--deep-green);
+        }
+
+        .btn-outline:hover {
+            background: var(--deep-green);
+            color: white;
+        }
+
+        .btn-request {
+            background: var(--amber);
+            color: white;
+        }
+
+        .btn-request:hover {
+            background: #D97706;
+        }
+
+        /* 액션 버튼 그룹 */
+        .action-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* 빈 상태 */
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        /* 모달 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn-cancel {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #F3F4F6;
+            color: #374151;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--deep-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background: #1E40AF;
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            .page-header h1 {
+                font-size: 24px;
+            }
+
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-badge {
+                margin: 16px 0 0 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .section {
+                padding: 16px;
+            }
+
+            .project-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .project-table th,
+            .project-table td {
+                padding: 12px;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+
+            .action-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div id="header-container"></div>
+
+    <!-- 메인 -->
+    <div class="container">
+        <div class="page-header">
+            <h1>회계사 마이페이지</h1>
+            <p>담당 프로젝트 및 평가 업무를 관리합니다</p>
+        </div>
+
+        <!-- 프로필 카드 -->
+        <div class="profile-card">
+            <div class="profile-avatar" id="profile-avatar">김</div>
+            <div class="profile-info">
+                <h2 id="accountant-name">김회계</h2>
+                <p>공인회계사 | valuelink@example.com</p>
+            </div>
+            <div class="profile-badge">인증됨</div>
+        </div>
+
+        <!-- 통계 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">5</div>
+                <div class="stat-label">전체 담당</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-in-progress">3</div>
+                <div class="stat-label">진행 중</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-pending">1</div>
+                <div class="stat-label">자료 대기</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-completed">1</div>
+                <div class="stat-label">완료</div>
+            </div>
+        </div>
+
+        <!-- 담당 프로젝트 목록 -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">담당 프로젝트</h2>
+                <span class="section-count" id="project-count">3건 진행 중</span>
+            </div>
+
+            <table class="project-table">
+                <thead>
+                    <tr>
+                        <th class="col-no">No</th>
+                        <th>회사명</th>
+                        <th>평가방법</th>
+                        <th>신청일</th>
+                        <th>상태</th>
+                        <th>작업</th>
+                    </tr>
+                </thead>
+                <tbody id="project-list">
+                    <!-- 동적으로 추가 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 추가 자료 요청 모달 -->
+    <div class="modal-overlay" id="request-modal">
+        <div class="modal-content">
+            <h3 class="modal-title">추가 자료 요청</h3>
+            <p id="modal-company-name" style="margin-bottom: 20px; color: #6B7280;">대상 회사: -</p>
+
+            <div class="form-group">
+                <label class="form-label">요청 자료 선택</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="doc-financial" value="최근 3년 재무제표">
+                        최근 3년 재무제표
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="doc-business" value="사업계획서">
+                        사업계획서
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="doc-contract" value="주요 계약서">
+                        주요 계약서
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="doc-org" value="조직도 및 인원 현황">
+                        조직도 및 인원 현황
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="doc-other" value="기타">
+                        기타
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group" id="other-doc-wrapper" style="display: none;">
+                <label class="form-label">기타 자료 내용</label>
+                <input type="text" class="form-input" id="other-doc-input" placeholder="필요한 자료를 입력하세요">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">요청 사유</label>
+                <textarea class="form-textarea" id="request-reason" placeholder="자료 요청 사유를 입력하세요"></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeRequestModal()">취소</button>
+                <button class="btn-submit" onclick="submitRequest()">요청 전송</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 헤더 로드
+        fetch('../../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+                setTimeout(() => {
+                    const menuMypage = document.getElementById('menu-mypage');
+                    if (menuMypage) menuMypage.classList.add('active');
+                }, 100);
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+
+        // 평가방법 한글명
+        const methodNames = {
+            'dcf': 'DCF 할인법',
+            'relative': '상대가치평가법',
+            'asset': '자산가치평가법'
+        };
+
+        // 상태 정보
+        const statusInfo = {
+            'assigned': { label: '배정됨', class: 'waiting' },
+            'in_progress': { label: '평가 진행 중', class: 'in-progress' },
+            'document_requested': { label: '자료 요청 중', class: 'document-requested' },
+            'document_submitted': { label: '자료 제출됨', class: 'document-submitted' }
+        };
+
+        // 테스트 데이터
+        const testProjects = [
+            {
+                id: 1,
+                company_name: '(주)파인드월드',
+                method: 'dcf',
+                request_date: '2026-01-20',
+                status: 'in_progress'
+            },
+            {
+                id: 2,
+                company_name: '(주)테크스타트',
+                method: 'relative',
+                request_date: '2026-01-22',
+                status: 'document_requested'
+            },
+            {
+                id: 3,
+                company_name: '(주)그린에너지',
+                method: 'asset',
+                request_date: '2026-01-25',
+                status: 'assigned'
+            }
+        ];
+
+        let currentProjectId = null;
+        let currentCompanyName = null;
+
+        // 프로젝트 목록 렌더링
+        function renderProjects() {
+            const tbody = document.getElementById('project-list');
+
+            if (testProjects.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-message">담당 프로젝트가 없습니다.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = testProjects.map((project, index) => {
+                const status = statusInfo[project.status] || statusInfo['assigned'];
+                return `
+                    <tr>
+                        <td class="col-no">${index + 1}</td>
+                        <td><span class="company-name">${project.company_name}</span></td>
+                        <td><span class="method-badge">${methodNames[project.method] || project.method}</span></td>
+                        <td>${project.request_date}</td>
+                        <td><span class="status-badge ${status.class}">${status.label}</span></td>
+                        <td>
+                            <div class="action-group">
+                                <a href="../projects/project-detail.html?id=${project.id}" class="btn btn-outline">상세</a>
+                                <button class="btn btn-request" onclick="openRequestModal(${project.id}, '${project.company_name}')">자료 요청</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 추가 자료 요청 모달 열기
+        function openRequestModal(projectId, companyName) {
+            currentProjectId = projectId;
+            currentCompanyName = companyName;
+            document.getElementById('modal-company-name').textContent = '대상 회사: ' + companyName;
+            document.getElementById('request-modal').classList.add('active');
+
+            // 체크박스 초기화
+            document.querySelectorAll('#request-modal input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.getElementById('request-reason').value = '';
+            document.getElementById('other-doc-input').value = '';
+            document.getElementById('other-doc-wrapper').style.display = 'none';
+        }
+
+        // 모달 닫기
+        function closeRequestModal() {
+            document.getElementById('request-modal').classList.remove('active');
+            currentProjectId = null;
+            currentCompanyName = null;
+        }
+
+        // 기타 체크박스 토글
+        document.getElementById('doc-other').addEventListener('change', function() {
+            document.getElementById('other-doc-wrapper').style.display = this.checked ? 'block' : 'none';
+        });
+
+        // 요청 전송
+        function submitRequest() {
+            const checkedDocs = [];
+            document.querySelectorAll('#request-modal input[type="checkbox"]:checked').forEach(cb => {
+                if (cb.id === 'doc-other') {
+                    const otherValue = document.getElementById('other-doc-input').value;
+                    if (otherValue) checkedDocs.push('기타: ' + otherValue);
+                } else {
+                    checkedDocs.push(cb.value);
+                }
+            });
+
+            const reason = document.getElementById('request-reason').value;
+
+            if (checkedDocs.length === 0) {
+                alert('요청할 자료를 선택해주세요.');
+                return;
+            }
+
+            if (!reason.trim()) {
+                alert('요청 사유를 입력해주세요.');
+                return;
+            }
+
+            // 실제 구현 시 API 호출
+            console.log('자료 요청:', {
+                projectId: currentProjectId,
+                companyName: currentCompanyName,
+                documents: checkedDocs,
+                reason: reason
+            });
+
+            alert('추가 자료 요청이 전송되었습니다.\n\n회사: ' + currentCompanyName + '\n\n요청 자료:\n- ' + checkedDocs.join('\n- '));
+            closeRequestModal();
+
+            // 상태 업데이트 (테스트)
+            const project = testProjects.find(p => p.id === currentProjectId);
+            if (project) {
+                project.status = 'document_requested';
+                renderProjects();
+            }
+        }
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('request-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRequestModal();
+            }
+        });
+
+        // 페이지 로드
+        renderProjects();
+    </script>
+</body>
+</html>

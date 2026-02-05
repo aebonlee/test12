@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCF 평가 - 자료 제출 | ValueLink</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 모바일 최적화 CSS -->
+    <link rel="stylesheet" href="../../styles/mobile-optimize.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --deep-green: #166534;
+            --deep-blue: #1D4ED8;
+            --amber: #F59E0B;
+            --deep-blue-light: #3B82F6;
+            --deep-blue-pale: #DBEAFE;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6B7280;
+            --bg-light: #F3F4F6;
+            --white: #FFFFFF;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+        }
+        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--bg-light); color: var(--text-primary); min-height: 100vh; }
+        /* Header styles moved to header.html component */
+
+        /* HERO SECTION */
+        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 40px; color: white; text-align: center; }
+        .hero-content { max-width: 1200px; margin: 0 auto; }
+        .hero-title { font-size: 36px; font-weight: 700; margin-bottom: 12px; }
+        .hero-subtitle { font-size: 18px; opacity: 0.9; margin-bottom: 20px; }
+        .hero-badge { display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 8px 16px; border-radius: 20px; font-size: 14px; }
+
+        .main-content { max-width: 1200px; margin: 0 auto; padding: 40px; }
+        .project-info-card { background: var(--white); border-radius: 16px; padding: 32px; margin-bottom: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .project-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+        .project-title { font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+        .project-id { font-size: 14px; color: var(--text-muted); font-family: monospace; background: var(--bg-light); padding: 4px 12px; border-radius: 4px; display: inline-block; }
+        .project-status { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+        .project-status.collecting { background: #FEF3C7; color: #92400E; }
+        .project-meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding-top: 24px; border-top: 1px solid #E5E7EB; }
+        .meta-item { text-align: center; }
+        .meta-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+        .meta-value { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .section-title { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+        .upload-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 32px; }
+        .upload-card { background: var(--white); border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .upload-card.full-width { grid-column: 1 / -1; }
+        .upload-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .upload-title { font-size: 16px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+        .upload-title .required { color: var(--error); font-size: 12px; }
+        .upload-status { font-size: 12px; padding: 4px 12px; border-radius: 12px; font-weight: 500; }
+        .upload-status.pending { background: #FEF3C7; color: #92400E; }
+        .upload-status.uploaded { background: #D1FAE5; color: #065F46; }
+        .upload-dropzone { border: 2px dashed #D1D5DB; border-radius: 12px; padding: 40px; text-align: center; transition: all 0.3s ease; cursor: pointer; }
+        .upload-dropzone:hover { border-color: var(--deep-blue); background: var(--deep-blue-pale); }
+        .upload-dropzone.dragover { border-color: var(--deep-blue); background: var(--deep-blue-pale); }
+        .dropzone-icon { font-size: 48px; margin-bottom: 16px; }
+        .dropzone-text { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+        .dropzone-hint { font-size: 12px; color: var(--text-muted); }
+        .btn-upload { display: inline-block; padding: 10px 20px; font-size: 14px; font-weight: 600; color: var(--white); background: var(--deep-blue); border: none; border-radius: 8px; cursor: pointer; margin-top: 16px; }
+        .file-list { margin-top: 16px; }
+        .file-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-light); border-radius: 8px; margin-bottom: 8px; }
+        .file-info { display: flex; align-items: center; gap: 12px; }
+        .file-icon { font-size: 24px; }
+        .file-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+        .file-size { font-size: 12px; color: var(--text-muted); }
+        .btn-file-action { padding: 6px 12px; font-size: 12px; border: none; border-radius: 6px; cursor: pointer; }
+        .btn-file-action.delete { background: #FEE2E2; color: var(--error); }
+        .input-section { background: var(--white); border-radius: 16px; padding: 32px; margin-bottom: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-label { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .form-label .required { color: var(--error); }
+        .form-input { padding: 12px 16px; font-size: 14px; border: 1px solid #D1D5DB; border-radius: 8px; }
+        .form-input:focus { outline: none; border-color: var(--deep-blue); }
+        .form-hint { font-size: 12px; color: var(--text-muted); }
+        textarea.form-input { min-height: 120px; resize: vertical; }
+        .submit-section { background: var(--white); border-radius: 16px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .submit-checklist { margin-bottom: 24px; }
+        .checklist-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #E5E7EB; }
+        .checklist-item:last-child { border-bottom: none; }
+        .checklist-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .checklist-icon.complete { background: var(--success); color: var(--white); }
+        .checklist-icon.incomplete { background: #E5E7EB; color: var(--text-muted); }
+        .checklist-text { font-size: 14px; color: var(--text-primary); }
+        .submit-actions { display: flex; justify-content: space-between; align-items: center; }
+        .btn-save-draft { padding: 14px 28px; font-size: 15px; font-weight: 600; color: var(--text-secondary); background: var(--white); border: 1px solid #D1D5DB; border-radius: 10px; cursor: pointer; }
+        .btn-submit { padding: 14px 40px; font-size: 15px; font-weight: 600; color: var(--white); background: var(--deep-blue); border: none; border-radius: 10px; cursor: pointer; }
+        .btn-submit:disabled { background: #9CA3AF; cursor: not-allowed; }
+        .notice-box { background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; }
+        .notice-box.info { background: var(--deep-blue-pale); border-color: var(--deep-blue-light); }
+        .notice-title { font-size: 14px; font-weight: 600; color: #92400E; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .notice-box.info .notice-title { color: var(--deep-blue); }
+        .notice-text { font-size: 13px; color: #78350F; line-height: 1.6; }
+        .notice-box.info .notice-text { color: #1E40AF; }
+        footer { background: #1E3A5F; color: var(--white); padding: 32px 40px; margin-top: 60px; }
+        .footer-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .footer-logo { font-size: 18px; font-weight: 700; }
+        .footer-text { font-size: 13px; opacity: 0.7; }
+        .hidden-input { display: none; }
+        .calc-section { background: var(--white); border-radius: 16px; padding: 32px; margin-bottom: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        /* btn-calculate, result-modal CSS removed - calculation done internally */
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            /* Header */
+            header {
+                padding: 0 20px;
+                height: auto;
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px 20px;
+            }
+
+            .header-left {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                width: 100%;
+            }
+
+            .main-nav {
+                flex-wrap: wrap;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .nav-item {
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+
+            .header-right {
+                width: 100%;
+                margin-top: 12px;
+                justify-content: space-between;
+            }
+
+            .user-info {
+                font-size: 13px;
+            }
+
+            .user-avatar {
+                width: 36px;
+                height: 36px;
+            }
+
+            /* Hero Section Responsive */
+            .hero-section {
+                padding: 40px 20px;
+            }
+
+            .hero-title {
+                font-size: 28px;
+            }
+
+            .hero-subtitle {
+                font-size: 16px;
+            }
+
+            .hero-badge {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+
+            /* Main Content */
+            .main-content {
+                padding: 20px;
+            }
+
+            /* Project Info Card */
+            .project-info-card {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .project-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .project-title {
+                font-size: 20px;
+            }
+
+            .project-id {
+                font-size: 12px;
+            }
+
+            .project-meta {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+                padding-top: 16px;
+            }
+
+            .meta-label {
+                font-size: 11px;
+            }
+
+            .meta-value {
+                font-size: 14px;
+            }
+
+            /* Upload Grid */
+            .upload-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-bottom: 20px;
+            }
+
+            .upload-card {
+                padding: 16px;
+            }
+
+            .upload-title {
+                font-size: 14px;
+            }
+
+            .upload-dropzone {
+                padding: 24px;
+            }
+
+            .dropzone-icon {
+                font-size: 36px;
+            }
+
+            .dropzone-text {
+                font-size: 13px;
+            }
+
+            .dropzone-hint {
+                font-size: 11px;
+            }
+
+            /* Form Grid */
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .form-input {
+                font-size: 16px; /* iOS 자동 확대 방지 */
+            }
+
+            /* Section Titles */
+            .section-title {
+                font-size: 16px;
+                margin-bottom: 16px;
+            }
+
+            /* Input Section */
+            .input-section {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            /* Submit Section */
+            .submit-section {
+                padding: 20px;
+            }
+
+            .submit-actions {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .btn-save-draft,
+            .btn-submit {
+                width: 100%;
+                padding: 14px;
+                text-align: center;
+            }
+
+            /* Notice Box */
+            .notice-box {
+                padding: 14px 16px;
+                margin-bottom: 16px;
+            }
+
+            .notice-title {
+                font-size: 13px;
+            }
+
+            .notice-text {
+                font-size: 12px;
+            }
+
+            /* Footer */
+            footer {
+                padding: 24px 20px;
+                margin-top: 40px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .footer-text {
+                font-size: 12px;
+            }
+        }
+
+        /* Tablet (769px ~ 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .upload-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .main-content {
+                padding: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div id="header-container"></div>
+
+    <!-- HERO SECTION -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">DCF 평가</h1>
+            <p class="hero-subtitle">자료 제출 및 추가 정보 입력</p>
+            <div class="hero-badge">
+                <span>프로젝트 ID: </span>
+                <span id="hero-project-id">-</span>
+            </div>
+        </div>
+    </div>
+
+        <main class="main-content">
+        <section class="project-info-card">
+            <div class="project-header">
+                <div>
+                    <h1 class="project-title" id="project-title">DCF 평가 - 자료 제출</h1>
+                    <span class="project-id" id="project-id">-</span>
+                </div>
+                <div class="project-status collecting">
+                    <span>📄</span>
+                    <span>자료 수집 중</span>
+                </div>
+            </div>
+            <div class="project-meta">
+                <div class="meta-item">
+                    <div class="meta-label">회사명</div>
+                    <div class="meta-value" id="company-name">파인더월드</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">평가 방법</div>
+                    <div class="meta-value">DCF평가법</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">담당 회계사</div>
+                    <div class="meta-value">선웅규 회계사</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">신청일</div>
+                    <div class="meta-value" id="created-date">-</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="notice-box">
+            <div class="notice-title">
+                <span>&#9888;&#65039;</span>
+                DCF 평가를 위한 자료 안내
+            </div>
+            <div class="notice-text">
+                DCF(현금흐름할인법) 평가를 위해 <strong>최근 3개년 재무제표</strong>와 <strong>향후 5년간 사업계획</strong>이 필수입니다.
+                CAPEX 계획과 운전자본 변동 계획도 함께 제출해 주시면 더욱 정확한 평가가 가능합니다.
+                <strong>HWP 파일은 PDF로 변환하여 업로드해 주세요.</strong>
+            </div>
+        </div>
+
+        <div class="upload-grid">
+            <div class="upload-card">
+                <div class="upload-header">
+                    <div class="upload-title">
+                        <span>&#128200;</span>
+                        재무제표 (3개년)
+                        <span class="required">*필수</span>
+                    </div>
+                    <span class="upload-status pending">미제출</span>
+                </div>
+                <div class="upload-dropzone" data-category="financial">
+                    <div class="dropzone-icon">&#128196;</div>
+                    <div class="dropzone-text">파일을 드래그하거나 클릭하여 업로드</div>
+                    <div class="dropzone-hint">최근 3개년 재무상태표, 손익계산서, 현금흐름표</div>
+                    <button class="btn-upload">파일 선택</button>
+                </div>
+                <input type="file" class="hidden-input" id="file-financial" multiple accept=".pdf,.xlsx,.xls">
+                <div class="file-list" id="list-financial"></div>
+            </div>
+
+            <div class="upload-card">
+                <div class="upload-header">
+                    <div class="upload-title">
+                        <span>&#128202;</span>
+                        사업계획서 (5개년 전망)
+                        <span class="required">*필수</span>
+                    </div>
+                    <span class="upload-status pending">미제출</span>
+                </div>
+                <div class="upload-dropzone" data-category="business_plan">
+                    <div class="dropzone-icon">&#128203;</div>
+                    <div class="dropzone-text">파일을 드래그하거나 클릭하여 업로드</div>
+                    <div class="dropzone-hint">향후 5개년 매출, 비용, 이익 전망</div>
+                    <button class="btn-upload">파일 선택</button>
+                </div>
+                <input type="file" class="hidden-input" id="file-business_plan" multiple accept=".pdf,.pptx,.ppt,.docx,.doc,.xlsx,.xls">
+                <div class="file-list" id="list-business_plan"></div>
+            </div>
+
+            <div class="upload-card">
+                <div class="upload-header">
+                    <div class="upload-title">
+                        <span>&#128101;</span>
+                        주주명부
+                        <span class="required">*필수</span>
+                    </div>
+                    <span class="upload-status pending">미제출</span>
+                </div>
+                <div class="upload-dropzone" data-category="shareholder">
+                    <div class="dropzone-icon">&#128100;</div>
+                    <div class="dropzone-text">파일을 드래그하거나 클릭하여 업로드</div>
+                    <div class="dropzone-hint">주주 현황 및 지분율</div>
+                    <button class="btn-upload">파일 선택</button>
+                </div>
+                <input type="file" class="hidden-input" id="file-shareholder" multiple accept=".pdf,.xlsx,.xls">
+                <div class="file-list" id="list-shareholder"></div>
+            </div>
+
+            <div class="upload-card">
+                <div class="upload-header">
+                    <div class="upload-title">
+                        <span>&#127959;&#65039;</span>
+                        CAPEX 계획
+                    </div>
+                    <span class="upload-status pending">미제출</span>
+                </div>
+                <div class="upload-dropzone" data-category="capex">
+                    <div class="dropzone-icon">&#128188;</div>
+                    <div class="dropzone-text">파일을 드래그하거나 클릭하여 업로드</div>
+                    <div class="dropzone-hint">설비투자 계획 및 감가상각 예정</div>
+                    <button class="btn-upload">파일 선택</button>
+                </div>
+                <input type="file" class="hidden-input" id="file-capex" multiple accept=".pdf,.xlsx,.xls">
+                <div class="file-list" id="list-capex"></div>
+            </div>
+
+            <div class="upload-card">
+                <div class="upload-header">
+                    <div class="upload-title">
+                        <span>&#128176;</span>
+                        운전자본 계획
+                    </div>
+                    <span class="upload-status pending">미제출</span>
+                </div>
+                <div class="upload-dropzone" data-category="working_capital">
+                    <div class="dropzone-icon">&#128181;</div>
+                    <div class="dropzone-text">파일을 드래그하거나 클릭하여 업로드</div>
+                    <div class="dropzone-hint">매출채권, 재고자산, 매입채무 회전율 전망</div>
+                    <button class="btn-upload">파일 선택</button>
+                </div>
+                <input type="file" class="hidden-input" id="file-working_capital" multiple accept=".pdf,.xlsx,.xls">
+                <div class="file-list" id="list-working_capital"></div>
+            </div>
+
+            <div class="upload-card">
+                <div class="upload-header">
+                    <div class="upload-title">
+                        <span>&#128193;</span>
+                        기타 자료
+                    </div>
+                    <span class="upload-status pending">미제출</span>
+                </div>
+                <div class="upload-dropzone" data-category="others">
+                    <div class="dropzone-icon">&#128230;</div>
+                    <div class="dropzone-text">파일을 드래그하거나 클릭하여 업로드</div>
+                    <div class="dropzone-hint">계약서, 인허가, 특허 등 (최대 5개)</div>
+                    <button class="btn-upload">파일 선택</button>
+                </div>
+                <input type="file" class="hidden-input" id="file-others" multiple>
+                <div class="file-list" id="list-others"></div>
+            </div>
+        </div>
+
+        <section class="input-section">
+            <h2 class="section-title">
+                <span>&#128221;</span>
+                DCF 평가 추가 정보
+            </h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">회사명 <span class="required">*</span></label>
+                    <input type="text" class="form-input" value="파인더월드" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">발행주식수 <span class="required">*</span></label>
+                    <input type="text" class="form-input" id="shares-outstanding" placeholder="예: 1,000,000" value="5000000">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">예상 매출성장률 (연평균)</label>
+                    <input type="text" class="form-input" id="revenue-growth" placeholder="예: 15%" value="40">
+                    <span class="form-hint">향후 5년 연평균 성장률</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">목표 영업이익률</label>
+                    <input type="text" class="form-input" id="operating-margin" placeholder="예: 12%" value="16">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">현재 차입금</label>
+                    <input type="text" class="form-input" id="total-debt" placeholder="백만원" value="7000000000">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">현재 현금성자산</label>
+                    <input type="text" class="form-input" id="cash" placeholder="백만원" value="8000000000">
+                </div>
+                <div class="form-group full-width">
+                    <label class="form-label">추가 요청사항</label>
+                    <textarea class="form-input" placeholder="할인율, 성장률 등에 대한 의견이 있으시면 입력해 주세요."></textarea>
+                </div>
+            </div>
+        </section>
+
+        <section class="calc-section">
+            <h2 class="section-title">
+                <span>🧮</span>
+                DCF 평가 계산
+            </h2>
+            <div class="notice-box info" style="margin-bottom: 24px;">
+                <div class="notice-title">
+                    <span>💡</span>
+                    간편 계산 도구
+                </div>
+                <div class="notice-text">
+                    아래 정보를 입력하면 간편하게 DCF 기업가치를 계산할 수 있습니다. 실제 평가에는 업로드한 재무제표와 사업계획서를 기반으로 정밀 계산이 수행됩니다.
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">최근 연도 매출액 <span class="required">*</span></label>
+                    <input type="text" class="form-input" id="current-revenue" placeholder="백만원" value="24500000000">
+                    <span class="form-hint">가장 최근 회계연도 매출액</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">WACC (가중평균자본비용) <span class="required">*</span></label>
+                    <input type="text" class="form-input" id="wacc" placeholder="예: 10%" value="11.59">
+                    <span class="form-hint">할인율로 사용됩니다</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">FCF 마진율 <span class="required">*</span></label>
+                    <input type="text" class="form-input" id="fcf-margin" placeholder="예: 8%" value="12">
+                    <span class="form-hint">잉여현금흐름 / 매출액</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">영구성장률 <span class="required">*</span></label>
+                    <input type="text" class="form-input" id="terminal-growth" placeholder="예: 2%" value="2.5">
+                    <span class="form-hint">Terminal Value 계산에 사용</span>
+                </div>
+            </div>
+            <!-- 기업가치 계산은 내부 시스템에서 수행됩니다 -->
+        </section>
+
+        <section class="submit-section">
+            <h2 class="section-title">
+                <span>&#9989;</span>
+                제출 전 확인
+            </h2>
+            <div class="submit-checklist">
+                <div class="checklist-item">
+                    <div class="checklist-icon incomplete">&#10003;</div>
+                    <div class="checklist-text">재무제표 (3개년) 업로드</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-icon incomplete">&#10003;</div>
+                    <div class="checklist-text">사업계획서 (5개년 전망) 업로드</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-icon incomplete">&#10003;</div>
+                    <div class="checklist-text">주주명부 업로드</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-icon incomplete">&#10003;</div>
+                    <div class="checklist-text">필수 정보 입력 완료</div>
+                </div>
+            </div>
+            <div class="submit-actions">
+                <button class="btn-save-draft">임시 저장</button>
+                <button class="btn-submit" disabled>자료 제출하기</button>
+            </div>
+        </section>
+        </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">ValueLink</div>
+            <div class="footer-text">© 2026 ValueLink. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <!-- Result Modal (removed - calculation done internally) -->
+
+    <!-- 헤더 로드 스크립트 -->
+    <script>
+        fetch('../../../components/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+                const scripts = document.getElementById('header-container').querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(error => console.error('헤더 로드 실패:', error));
+    </script>
+
+    <!-- 페이지 스크립트 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase 설정
+        let supabase = null;
+        try {
+            const SUPABASE_URL = 'https://arxrfetgaitkgiiqabap.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeHJmZXRnYWl0a2dpaXFhYmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3ODk1OTgsImV4cCI6MjA4NDM2NTU5OH0.BTnuv0sYr2MGe1c-gk8PWCviwkFyIiymfKp5Jhzwbo0';
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch(e) { console.warn('Supabase 초기화 스킵 - 페이지 정상 작동'); }
+
+        // URL에서 프로젝트 ID 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('projectId') || 'FINDE-2601270530-DC';
+
+        // Hero section에 프로젝트 ID 표시
+        const heroProjectId = document.getElementById('hero-project-id');
+        if (heroProjectId) heroProjectId.textContent = projectId;
+
+        const ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png', '.txt', '.csv', '.json', '.xml', '.md', '.html', '.zip', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.gif', '.webp', '.bmp'];
+        const CONVERT_REQUIRED = ['.hwp'];
+        const MAX_OTHER_FILES = 5;
+        const MAX_FILE_SIZE = 20 * 1024 * 1024;
+        const MAX_TOTAL_SIZE = 100 * 1024 * 1024;
+
+        const uploadedFiles = { financial: [], business_plan: [], shareholder: [], capex: [], working_capital: [], others: [] };
+
+        // calculateDCF 및 resultModal 제거됨 - 기업가치 계산은 내부 시스템에서 수행
+
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        document.querySelectorAll('.upload-dropzone').forEach(dropzone => {
+            const category = dropzone.dataset.category;
+            const fileInput = document.getElementById(`file-${category}`);
+            dropzone.addEventListener('click', () => fileInput.click());
+            dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+            dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('dragover'); });
+            dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); handleFiles(e.dataTransfer.files, category); });
+            fileInput.addEventListener('change', (e) => { handleFiles(e.target.files, category); });
+        });
+
+        function handleFiles(files, category) {
+            const fileList = document.getElementById(`list-${category}`);
+            Array.from(files).forEach(file => {
+                const validation = validateFile(file, category);
+                if (!validation.valid) { alert(validation.message); return; }
+                if (category === 'others' && uploadedFiles.others.length >= MAX_OTHER_FILES) { alert('기타 자료는 최대 5개까지 업로드 가능합니다.'); return; }
+                uploadedFiles[category].push(file);
+                addFileToList(file, category, fileList);
+                updateUploadStatus(category);
+                updateChecklist();
+            });
+        }
+
+        function validateFile(file, category) {
+            const ext = '.' + file.name.split('.').pop().toLowerCase();
+            if (CONVERT_REQUIRED.includes(ext)) return { valid: false, message: 'HWP 파일은 PDF로 변환하여 업로드해 주세요.' };
+            if (!ALLOWED_EXTENSIONS.includes(ext)) return { valid: false, message: '지원하지 않는 파일 형식입니다.' };
+            if (file.size > MAX_FILE_SIZE) return { valid: false, message: '파일 용량은 20MB를 초과할 수 없습니다.' };
+            if (category === 'others') {
+                const totalSize = uploadedFiles.others.reduce((sum, f) => sum + f.size, 0) + file.size;
+                if (totalSize > MAX_TOTAL_SIZE) return { valid: false, message: '기타 자료의 총 용량은 100MB를 초과할 수 없습니다.' };
+            }
+            return { valid: true };
+        }
+
+        function addFileToList(file, category, container) {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            const size = file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB' : (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+            fileItem.innerHTML = `<div class="file-info"><span class="file-icon">&#128196;</span><div><div class="file-name">${file.name}</div><div class="file-size">${size}</div></div></div><div><button class="btn-file-action delete" onclick="removeFile('${category}', '${file.name}', this)">삭제</button></div>`;
+            container.appendChild(fileItem);
+        }
+
+        function removeFile(category, fileName, button) {
+            uploadedFiles[category] = uploadedFiles[category].filter(f => f.name !== fileName);
+            button.closest('.file-item').remove();
+            updateUploadStatus(category);
+            updateChecklist();
+        }
+
+        function updateUploadStatus(category) {
+            const card = document.querySelector(`[data-category="${category}"]`).closest('.upload-card');
+            const statusBadge = card.querySelector('.upload-status');
+            if (uploadedFiles[category].length > 0) {
+                statusBadge.textContent = `${uploadedFiles[category].length}개 업로드됨`;
+                statusBadge.classList.remove('pending');
+                statusBadge.classList.add('uploaded');
+            } else {
+                statusBadge.textContent = '미제출';
+                statusBadge.classList.remove('uploaded');
+                statusBadge.classList.add('pending');
+            }
+        }
+
+        function updateChecklist() {
+            const checklistItems = document.querySelectorAll('.checklist-item');
+            const checks = [uploadedFiles.financial.length > 0, uploadedFiles.business_plan.length > 0, uploadedFiles.shareholder.length > 0, true];
+            checklistItems.forEach((item, index) => {
+                const icon = item.querySelector('.checklist-icon');
+                icon.classList.toggle('complete', checks[index]);
+                icon.classList.toggle('incomplete', !checks[index]);
+            });
+            document.querySelector('.btn-submit').disabled = !checks.slice(0, 3).every(Boolean);
+        }
+
+        document.querySelector('.btn-save-draft').addEventListener('click', () => { alert('임시 저장되었습니다.'); });
+        document.querySelector('.btn-submit').addEventListener('click', () => {
+            if (confirm('자료를 제출하시겠습니까?')) {
+                alert('자료가 성공적으로 제출되었습니다.');
+                // customer-portal.html로 리다이렉트
+                window.location.href = '../../customer/customer-portal.html';
+            }
+        });
+    </script>
+
+
+</body>
+</html>
